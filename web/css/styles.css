@@ -1,0 +1,17 @@
+:root {
+  --brand: #38bdf8;
+  --card: #121a2a;
+  --error: #ff6b6b;
+}
+body {
+  margin: 0; font-family: Arial, sans-serif;
+  background: #0b1220; color: white;
+}
+.site-header { display: flex; align-items: center; gap: 10px; padding: 15px; background: #0c1424; }
+.logo { width: 32px; height: 32px; }
+.card { background: var(--card); padding: 20px; margin: 40px auto; max-width: 400px; border-radius: 12px; }
+label { display: block; margin: 10px 0; }
+input { width: 100%; padding: 8px; border-radius: 6px; }
+button { background: var(--brand); border: none; padding: 10px 12px; margin-top: 10px; border-radius: 8px; cursor: pointer; }
+button.link { background: transparent; color: var(--brand); text-decoration: underline; }
+.error { color: var(--error); }
