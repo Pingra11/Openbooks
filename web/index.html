@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>OpenBooks — User Management System</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-left">
+      <img src="assets/logo.svg" alt="OpenBooks Logo" class="logo" />
+      <h1>OpenBooks</h1>
+    </div>
+  </header>
+
+  <main class="card">
+    <h2>Sign in</h2>
+    <form id="loginForm">
+      <label>Username
+        <input id="username" required />
+      </label>
+      <label>Password
+        <input id="password" type="password" required />
+      </label>
+      <button type="submit">Login</button>
+      <div class="row actions">
+        <button type="button" id="forgotBtn" class="link">Forgot Password</button>
+        <button type="button" id="createUserBtn" class="link">Create New User</button>
+      </div>
+      <p id="loginError" class="error"></p>
+    </form>
+  </main>
+
+  <script type="module" src="js/firebaseConfig.js"></script>
+  <script type="module" src="js/ui.js"></script>
+  <script type="module" src="js/auth.js"></script>
+</body>
+</html>
