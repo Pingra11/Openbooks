@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>OpenBooks — Manager Dashboard</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-left">
+      <img src="assets/logo.svg" class="logo" />
+      <h1>Manager Dashboard</h1>
+    </div>
+    <div class="header-right">
+      <div id="userChip" class="account-chip"></div>
+    </div>
+  </header>
+
+  <main class="dashboard manager-dashboard">
+    <div class="dashboard-grid">
+      
+      <section class="card team-overview">
+        <h2>Team Overview</h2>
+        <div id="teamStats" class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-number" id="teamMemberCount">0</span>
+            <span class="stat-label">Team Members</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number" id="activeUsersCount">0</span>
+            <span class="stat-label">Active Today</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card team-members">
+        <h2>Team Members</h2>
+        <div class="table-container">
+          <table id="teamTable">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Last Login</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card recent-activity">
+        <h2>Recent Activity</h2>
+        <div id="recentActivity" class="activity-list">
+          <!-- Activity items will be loaded here -->
+        </div>
+      </section>
+
+      <section class="card quick-actions">
+        <h2>Quick Actions</h2>
+        <div class="action-buttons">
+          <button onclick="showPasswordExpiryReport()">Password Expiry Report</button>
+          <button onclick="showLoginReport()">Login Activity Report</button>
+          <button onclick="showSystemSettings()">System Settings</button>
+        </div>
+        
+        <div class="system-actions">
+          <button id="signOut" class="sign-out-btn">Sign Out</button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Password Expiry Report Modal -->
+  <div id="passwordExpiryModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('passwordExpiryModal')">&times;</span>
+      <h2>Password Expiry Report</h2>
+      <div id="passwordExpiryContent"></div>
+    </div>
+  </div>
+
+  <!-- Login Report Modal -->
+  <div id="loginReportModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('loginReportModal')">&times;</span>
+      <h2>Login Activity Report</h2>
+      <div id="loginReportContent"></div>
+    </div>
+  </div>
+
+  <!-- System Settings Modal -->
+  <div id="systemSettingsModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('systemSettingsModal')">&times;</span>
+      <h2>System Settings</h2>
+      <form id="systemSettingsForm">
+        <div class="settings-section">
+          <h3>Security Questions</h3>
+          <p>Configure three security questions for account recovery and verification.</p>
+          
+          <div class="field-group">
+            <label for="securityQuestion1">Security Question 1 *</label>
+            <select id="securityQuestion1" name="securityQuestion1" required>
+              <option value="">Select a question...</option>
+              <option value="pet_name">What was the name of your first pet?</option>
+              <option value="school_name">What was the name of your elementary school?</option>
+              <option value="childhood_friend">What was the name of your childhood best friend?</option>
+              <option value="birth_city">In what city were you born?</option>
+              <option value="mother_maiden">What is your mother's maiden name?</option>
+              <option value="first_car">What was the make of your first car?</option>
+              <option value="favorite_teacher">What was the name of your favorite teacher?</option>
+              <option value="street_grew_up">What street did you grow up on?</option>
+              <option value="first_job">What was your first job?</option>
+              <option value="childhood_nickname">What was your childhood nickname?</option>
+            </select>
+            <input type="text" id="securityAnswer1" name="securityAnswer1" placeholder="Your answer" maxlength="100" />
+          </div>
+
+          <div class="field-group">
+            <label for="securityQuestion2">Security Question 2 *</label>
+            <select id="securityQuestion2" name="securityQuestion2" required>
+              <option value="">Select a question...</option>
+              <option value="favorite_food">What is your favorite food?</option>
+              <option value="high_school">What high school did you attend?</option>
+              <option value="first_concert">What was the first concert you attended?</option>
+              <option value="favorite_movie">What is your favorite movie?</option>
+              <option value="paternal_grandfather">What is your paternal grandfather's first name?</option>
+              <option value="favorite_book">What is your favorite book?</option>
+              <option value="vacation_place">What was your favorite place to visit as a child?</option>
+              <option value="first_phone">What was your first phone number?</option>
+              <option value="dream_job">What was your dream job as a child?</option>
+              <option value="favorite_color">What is your favorite color?</option>
+            </select>
+            <input type="text" id="securityAnswer2" name="securityAnswer2" placeholder="Your answer" maxlength="100" />
+          </div>
+
+          <div class="field-group">
+            <label for="securityQuestion3">Security Question 3 *</label>
+            <select id="securityQuestion3" name="securityQuestion3" required>
+              <option value="">Select a question...</option>
+              <option value="sports_team">What is your favorite sports team?</option>
+              <option value="birth_hospital">In what hospital were you born?</option>
+              <option value="maternal_grandmother">What is your maternal grandmother's first name?</option>
+              <option value="honeymoon_destination">Where did you go on your honeymoon?</option>
+              <option value="first_boss">What was the name of your first boss?</option>
+              <option value="childhood_hero">Who was your childhood hero?</option>
+              <option value="favorite_holiday">What is your favorite holiday?</option>
+              <option value="first_pet_type">What type of animal was your first pet?</option>
+              <option value="college_major">What was your college major?</option>
+              <option value="lucky_number">What is your lucky number?</option>
+            </select>
+            <input type="text" id="securityAnswer3" name="securityAnswer3" placeholder="Your answer" maxlength="100" />
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" onclick="closeModal('systemSettingsModal')" class="btn-secondary">Cancel</button>
+          <button type="submit" class="btn-primary">Save Settings</button>
+        </div>
+      </form>
+      <script>
+        // Attach form submit handler for security questions
+        document.getElementById('systemSettingsForm').addEventListener('submit', window.saveSecurityQuestions);
+      </script>
+    </div>
+  </div>
+
+  <script type="module" src="js/firebaseConfig.js"></script>
+  <script type="module" src="js/ui.js"></script>
+  <script type="module" src="js/auth.js"></script>
+  <script type="module" src="js/manager.js"></script>
+</body>
+</html>

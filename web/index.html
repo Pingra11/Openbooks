@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>OpenBooks — User Management System</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-left">
+      <img src="assets/logo.svg" alt="OpenBooks Logo" class="logo" />
+      <h1>OpenBooks</h1>
+    </div>
+  </header>
+
+  <main class="card">
+    <h2>Sign in</h2>
+    <form id="loginForm">
+      <label>Username
+        <input id="username" required />
+      </label>
+      <label>Password
+        <input id="password" type="password" required />
+      </label>
+      <button type="submit">Login</button>
+      <div class="row actions">
+        <button type="button" id="forgotBtn" class="link">Forgot Password</button>
+        <button type="button" id="createUserBtn" class="link">Request Access</button>
+      </div>
+      <p id="loginError" class="error"></p>
+    </form>
+  </main>
+
+  <!-- Enhanced Forgot Password Modal -->
+  <div id="forgotPasswordModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('forgotPasswordModal')">&times;</span>
+      <h2>Password Recovery</h2>
+      
+      <!-- Step 1: User Identification -->
+      <div id="forgotStep1" class="forgot-step">
+        <h3>Step 1: Account Verification</h3>
+        <div class="field-group">
+          <label>Email Address *</label>
+          <input id="forgotEmail" type="email" required />
+        </div>
+        <div class="field-group">
+          <label>User ID *</label>
+          <input id="forgotUserID" required />
+          <small>Enter the User ID provided when your account was created</small>
+        </div>
+        <button onclick="verifyUserAccount()" class="primary">Verify Account</button>
+        <div id="verificationResult"></div>
+      </div>
+      
+      <!-- Step 2: Security Questions -->
+      <div id="forgotStep2" class="forgot-step" style="display: none;">
+        <h3>Step 2: Security Questions</h3>
+        <div id="securityQuestionsContainer"></div>
+        <button onclick="verifySecurityAnswers()" class="primary">Verify Answers</button>
+        <div id="securityResult"></div>
+      </div>
+      
+      <!-- Step 3: New Password -->
+      <div id="forgotStep3" class="forgot-step" style="display: none;">
+        <h3>Step 3: Set New Password</h3>
+        <div class="field-group">
+          <label>New Password *</label>
+          <input id="newForgotPassword" type="password" required />
+          <small>Must be 8+ characters, start with letter, contain letter/number/special character</small>
+        </div>
+        <div class="field-group">
+          <label>Confirm New Password *</label>
+          <input id="confirmForgotPassword" type="password" required />
+        </div>
+        <button onclick="resetPassword()" class="primary">Reset Password</button>
+        <div id="resetResult"></div>
+      </div>
+      
+      <button type="button" onclick="closeModal('forgotPasswordModal')" class="secondary">Cancel</button>
+    </div>
+  </div>
+
+  <script type="module" src="js/firebaseConfig.js"></script>
+  <script type="module" src="js/ui.js"></script>
+  <script type="module" src="js/auth.js"></script>
+  <script type="module" src="js/forgot-password.js"></script>
+</body>
+</html>
