@@ -1,4 +1,4 @@
-# Foobar
+# Openbooks
 
 OpenBooks is a web-based accounting system that allows secure access from any device or browser. The application will include accounting features such as creating a chart of accounts, recording journal entries, posting transactions, and generating basic financial statements. It will also include strong login security, registered role-based user access, and user-friendly design. The goal is to create a functional and usable system that makes use of efficient and reliable accounting processes.
 
