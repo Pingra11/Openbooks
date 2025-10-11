@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>OpenBooks — General Ledger Entry</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-left">
+      <img src="assets/logo.svg" alt="OpenBooks Logo" class="logo" />
+      <h1>OpenBooks</h1>
+    </div>
+  </header>
+
+  <main class="card">
+    <h2>General Ledger Entry</h2>
+    <form id="ledgerForm">
+      <div class="field-group">
+        <label>Date *</label>
+        <input type="date" id="entryDate" required />
+      </div>
+
+      <div class="field-group">
+        <label>Account Name *</label>
+        <input type="text" id="accountName" placeholder="e.g. Cash, Accounts Receivable" required />
+      </div>
+
+      <div class="field-group">
+        <label>Debit Amount</label>
+        <input type="number" id="debitAmount" step="0.01" placeholder="0.00" />
+      </div>
+
+      <div class="field-group">
+        <label>Credit Amount</label>
+        <input type="number" id="creditAmount" step="0.01" placeholder="0.00" />
+      </div>
+
+      <div class="field-group">
+        <label>Description</label>
+        <textarea id="description" placeholder="Enter transaction details"></textarea>
+      </div>
+
+      <button type="submit" class="primary">Save Entry</button>
+      <button type="button" id="viewEntriesBtn" class="secondary">View All Entries</button>
+      <p id="ledgerMessage" class="status"></p>
+    </form>
+
+    <section id="ledgerList" style="margin-top:2em; display:none;">
+      <h3>Ledger Entries</h3>
+      <table id="ledgerTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Account</th>
+            <th>Debit</th>
+            <th>Credit</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script type="module" src="js/firebaseConfig.js"></script>
+  <script type="module" src="js/firebaseMethods.js"></script>
+  <script type="module" src="js/gledger.js"></script>
+</body>
+</html>

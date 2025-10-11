@@ -52,6 +52,10 @@
               <button onclick="showCreateUserModal()">Create New User</button>
               <button onclick="showBulkActionsModal()">Bulk Actions</button>
             </div>
+            <h2>Ledger Entries</h2>
+            <div class="action-buttons">
+              <button onclick="goTogeneralledger()">Open General Ledger</button>
+            </div>
           </div>
           
           <div class="user-management-controls">
@@ -574,6 +578,11 @@
       </script>
     </div>
   </div>
+   <script>
+        function goTogeneralledger() {
+            window.location.href = 'gledger.html'; // Replace 'another-page.html' with the actual path to your HTML file
+        }
+    </script>
 
   <script type="module" src="js/firebaseConfig.js"></script>
   <script type="module" src="js/ui.js"></script>
