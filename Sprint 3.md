@@ -1,139 +1,142 @@
 # Sprint 3
+
+Chart of Accounts
 ---
 
-## Administrator
----
+- `Send Email` Button
+- `Create Journal Entry` Button
+- `View Journal Button`
 
-- ~~CRUD Accounts (implemented in Sprint 2).~~
-- ~~View event logs for each account in the chart of accounts.~~
-	- ~~Event logs must show the before and after image of each account.~~
-	- ~~If an account is added for the first time, there will be no before image.~~
-	- ~~If an account name is modified, there must be a before and after account image~~
-		- ~~including the user id of the person who made the change and the time and date of the change~~
-- ~~Be able to send email to manager or accountant user from the chart of accounts page.~~
+Roles
 
-## **Manager**
+- Admin
+	- ~~CRUD accounts~~
+	- Email button can send emails to other roles.
+- Manager
+	- Email button can send emails to other roles.
+- Accountant
+	- Email button can send emails to other roles.
 
-- Journal Entry Management
-	- Create journal entries for Chart of Accounts (CoA) accounts
-	- Approve or reject journal entries prepared by accountants
-	- Once approved, the entry is reflected in the ledger for the account
+## Journal Entries
 
-- Journal Entry Review
-	- View all journal entries submitted for approval with pending status
-	- View all approved journal entries
-	- View all rejected journal entries
-	- Filter journal entries by:
-		- status (pending, approved, rejected)
-		- date
-	- Search journal entries by:
-		- account
-		- name
-		- amount
-		- date
+Component for journal entries to be created and submitted
 
-- Event Log Management
-	- View event logs for each account in the chart of accounts
-	- Each event log shows before and after of account data
-	- When an account is added for the first time, there is no before image
-	- When an account name is modified, display:
-		- before and after account images
-		- user ID of person who made the change
-		- date and time of the change
-
-- Ledger Access and Navigation
-	- Click an account name to open its ledger page
-	- From the ledger page, click the post reference (PR) to open the journal entry that created the account
-
-- Ledger Page Requirements
-	- Display the following columns:
-		- date of the journal entry
-		- description (usually empty)
-		- debit
-		- credit
-		- balance
-	- Balance after each transaction and posting must be accurate
-	- Include filtering and search functions
-		- filtering by date or date range
-		- searching by account name or amount
-
-## Accountant user:
-
-### Journal Entry Management
-
-Creation of Journal Entries
-
-- Can create journal entries using only accounts found in the chart of accounts
-- Debits come before credits in each journal entry
-- Supports multiple debits and multiple credits per journal entry
-- Allows attaching source documents (PDF, DOC/DOCX, XLSX/XLS, CSV, JPG, PNG)
-- Can cancel or reset a journal entry before submission
-- Once submitted, journal entries cannot be deleted by accountants
-
-### Preparation and Submission
-
-- Accountants can prepare and submit journal entries
-- Can view journal entries created by managers or other accountants
-- Can view journal entry status: pending, approved, or rejected
-- Can filter journal entries by status and date
-- Can search journal entries by account name, amount, or date
-
-### Validation and Error Handling
-
+- debits displayed before credits (?)
+- Support multiple debit/credit per journal entry
+- Suport attaching source documents:
+	- `PDF`
+	- `DOC/DOCX`
+	- `XLSX/XLS`
+	- `CSV`
+	- `JPG`
+	- `PNG`
+- Entries can be cancelled or reset before submission
 - Total debits must equal total credits before submission
 - Transactions with errors cannot be submitted
-- Error messages:
-	- Housed in a database table
-	- Displayed in red color
-	- Disappear automatically once the root cause is fixed
-- error conditions:
+- Error conditions:
 	- Debit ≠ Credit
 	- Missing account from chart of accounts
 	- Missing or invalid attachment type
 	- Empty debit or credit amount
 	- Invalid date format
-	- Unauthorized user action
 
-### Notifications
+Roles
 
-- Manager receives a notification when a journal entry is submitted for approval
+- Admin
+- Manager
+	- Create Journal Entries for CoA Accounts
+- Accountant
+	- Create Journal Entries for CoA Accounts
+	- Cannot delete submitted journal entries
 
-### 2. Chart of Accounts
+## Ledger View
 
-#### 2.1 Viewing and Navigation
+_Component that displays a given account's ledger_
 
-- Clicking an account name leads to its ledger page
-
-#### 2.2 Event Logs
-
-- View event logs for each account
-	- Show before and after image of account changes
-	- No before image for newly added accounts
-	- For modifications: show before and after states, user ID, date, and time
-
-### 3. Ledger Management
-
-#### 3.1 Ledger Page Structure
-
+- Opened by clicking on the account in the CoA
 - Shows all entries for the selected account
-- Columns:
-	- Date of journal entry
-	- Description (usually empty)
-	- Debit
-	- Credit
-	- Balance (accurate after each transaction)
+- `Post Reference` button that displays the journal entry that created the account
+- Displays columns:
+	- `date` of creation
+	- `description` (usually empty)
+	- `debit`
+	- `credit`
+	- `balance`
+- Balance after each transaction and posting must be accurate
+- Include filtering and search functions
+	- filtering by date or date range
+	- searching by account name or amount
 
-#### 3.2 Navigation
+Roles
 
-- Clicking a post reference (PR) leads to the originating journal entry
+- Admin
+- Manager
+- Accountant
 
-#### 3.3 Filtering and Search
+## General Requirements
 
-- Filter ledger entries by date or date range
-- Search by account name or amount
+- Error messages
+	- Displayed in red
+	- Dissapear once resolved automatically
 
-### 4. Communication
+- Notifications
+	- Manager receives a notification when a journal entry is submitted for approval
 
-#### 4.1 Messaging Function
+## Journal View
 
-- Ability to send email to the manager or administrator from the CoA page
+_Component that displays journal entries_
+
+- Display all journal entries as one of:
+	- `Approved`
+	- `Pending`
+	- `Rejected`
+- Filter results by:
+	- `Status`
+	- `Date`
+- Search results by:
+	- `Account`
+	- `Name`
+	- `Amount`
+	- `Date`
+
+Roles
+
+- Shared
+- Accountant
+	- Read privileges
+- Manager
+	- Read privileges
+	- Approve/Deny options for each journal entry
+		- Deny requires reason
+		- Approve updates ledgers
+
+## Event Log
+
+- Log all updates to accounts
+	- Account Creation
+	- Account Modification
+	- Journal Entry Submissions
+	- Journal Entry Approvals
+	- Journal Entry Denials
+	- Ledger Postings
+- Clickable event log entries (details modal)
+	- Show before/after of the data from the event
+	- Show `userID`, `date`, and `time` of event
+	- Account creation shows no "before" data
+
+Roles
+
+- Admin
+	- ~~View event logs for each account in CoA~~
+- Manager
+	- View event logs for each account in CoA
+- Accountant
+
+## Flow (reference)
+
+1. Accountant writes journal entry
+2. Journal entry sent to journal
+3. manager opens journal
+4. approves/denies journal entry
+5. entry posts to the respective ledgers
+6. Ledgers display updated info for Accountants
