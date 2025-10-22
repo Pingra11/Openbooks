@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Financial Reports - OpenBooks</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="reports">
+  <div class="container">
+    <!-- Header -->
+    <header class="site-header">
+      <div class="header-left">
+        <img src="assets/logo.svg" alt="OpenBooks Logo" class="logo">
+        <h1>OpenBooks</h1>
+      </div>
+      <div class="header-right">
+        <button onclick="showHelp()" class="help-btn" title="Access help documentation">
+          <span>❓</span> Help
+        </button>
+        <button onclick="signOut()" class="btn-secondary signout-btn">Sign Out</button>
+        <div id="userChip" class="user-chip"></div>
+      </div>
+    </header>
+
+    <!-- Calendar Widget Below Header (Left aligned under logo) -->
+    <div class="calendar-widget-below-header">
+      <div id="currentDate"></div>
+    </div>
+
+    <!-- Main Navigation Bar for Core Accounting Features -->
+    <nav class="main-nav-bar">
+      <button onclick="navigateToDashboard()" class="nav-btn" title="Go to Dashboard">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Dashboard</span>
+      </button>
+      <button onclick="window.location.href='chart-of-accounts.html'" class="nav-btn" title="Manage Chart of Accounts">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Chart of Accounts</span>
+      </button>
+      <button onclick="window.location.href='journal.html'" class="nav-btn" title="Create and manage journal entries">
+        <span class="nav-icon">📝</span>
+        <span class="nav-label">Journal Entries</span>
+      </button>
+      <button onclick="window.location.href='account-ledger.html'" class="nav-btn" title="View account transaction ledgers">
+        <span class="nav-icon">📖</span>
+        <span class="nav-label">Account Ledger</span>
+      </button>
+      <button onclick="window.location.href='reports.html'" class="nav-btn active" title="View financial reports and statements">
+        <span class="nav-icon">📈</span>
+        <span class="nav-label">Reports</span>
+      </button>
+    </nav>
+
+    <main class="main-content">
+      <div class="page-header">
+        <h2>Financial Reports</h2>
+        <div>
+          <button onclick="printReport()" class="btn-secondary" title="Print Current Report">
+            🖨️ Print
+          </button>
+        </div>
+      </div>
+
+      <!-- Report Type Selector -->
+      <div class="report-selector">
+        <div class="report-tabs">
+          <button id="tabTrialBalance" class="report-tab active" onclick="showReport('trialBalance')" title="View Trial Balance report">
+            Trial Balance
+          </button>
+          <button id="tabBalanceSheet" class="report-tab" onclick="showReport('balanceSheet')" title="View Balance Sheet report">
+            Balance Sheet
+          </button>
+          <button id="tabIncomeStatement" class="report-tab" onclick="showReport('incomeStatement')" title="View Income Statement report">
+            Income Statement
+          </button>
+          <button id="tabRetainedEarnings" class="report-tab" onclick="showReport('retainedEarnings')" title="View Retained Earnings Statement">
+            Retained Earnings
+          </button>
+        </div>
+        
+        <div class="report-date-filter">
+          <label>As of Date:</label>
+          <input type="date" id="reportDate" onchange="loadCurrentReport()">
+        </div>
+      </div>
+
+      <!-- Report Content Areas -->
+      <div id="reportContent" class="report-content">
+        <!-- Trial Balance -->
+        <div id="trialBalanceReport" class="report-section active">
+          <div class="report-header">
+            <h3>Trial Balance</h3>
+            <p class="report-date">As of <span id="tbDate"></span></p>
+          </div>
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Account Number</th>
+                <th>Account Name</th>
+                <th class="amount">Debit</th>
+                <th class="amount">Credit</th>
+              </tr>
+            </thead>
+            <tbody id="trialBalanceBody">
+              <tr><td colspan="4" style="text-align: center;">Loading...</td></tr>
+            </tbody>
+            <tfoot id="trialBalanceFoot">
+            </tfoot>
+          </table>
+        </div>
+
+        <!-- Balance Sheet -->
+        <div id="balanceSheetReport" class="report-section">
+          <div class="report-header">
+            <h3>Balance Sheet</h3>
+            <p class="report-date">As of <span id="bsDate"></span></p>
+          </div>
+          <div id="balanceSheetContent">
+            <table class="report-table">
+              <tbody id="balanceSheetBody">
+                <tr><td colspan="2" style="text-align: center;">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Income Statement -->
+        <div id="incomeStatementReport" class="report-section">
+          <div class="report-header">
+            <h3>Income Statement</h3>
+            <p class="report-date">As of <span id="isDate"></span></p>
+          </div>
+          <div id="incomeStatementContent">
+            <table class="report-table">
+              <tbody id="incomeStatementBody">
+                <tr><td colspan="2" style="text-align: center;">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Retained Earnings -->
+        <div id="retainedEarningsReport" class="report-section">
+          <div class="report-header">
+            <h3>Statement of Retained Earnings</h3>
+            <p class="report-date">As of <span id="reDate"></span></p>
+          </div>
+          <div id="retainedEarningsContent">
+            <table class="report-table">
+              <tbody id="retainedEarningsBody">
+                <tr><td colspan="2" style="text-align: center;">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Calendar Picker Modal -->
+  <div id="calendarPickerModal" class="calendar-picker-modal">
+    <div class="calendar-picker">
+      <div class="calendar-header">
+        <button class="calendar-nav-btn" onclick="previousMonth()">‹</button>
+        <h3 id="calendarMonthYear">January 2025</h3>
+        <button class="calendar-nav-btn" onclick="nextMonth()">›</button>
+      </div>
+      <div id="calendarDays" class="calendar-days"></div>
+      <button class="calendar-close" onclick="closeCalendarPicker()">Close</button>
+    </div>
+  </div>
+
+  <script type="module" src="js/reports.js"></script>
+  <script src="js/calendar-picker.js"></script>
+  <script>
+    // Update calendar - respects manually selected date
+    function updateCalendar() {
+      const dateEl = document.getElementById('currentDate');
+      if (dateEl && !isDateManuallySelected) {
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        dateEl.textContent = now.toLocaleDateString('en-US', options);
+      }
+    }
+    
+    setInterval(updateCalendar, 1000);
+    updateCalendar();
+    
+    function printReport() {
+      window.print();
+    }
+    
+    async function signOut() {
+      if (confirm('Are you sure you want to sign out?')) {
+        const { signOut: firebaseSignOut } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js');
+        const { auth } = await import('./js/firebaseConfig.js');
+        await firebaseSignOut(auth);
+        window.location.href = 'index.html';
+      }
+    }
+  </script>
+  <script src="js/help.js"></script>
+</body>
+</html>

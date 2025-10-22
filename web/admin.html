@@ -12,9 +12,42 @@
       <h1>Admin Console</h1>
     </div>
     <div class="header-right">
+      <button onclick="showHelp()" class="help-btn" title="Access help documentation">
+        <span>❓</span> Help
+      </button>
+      <button onclick="signOut()" class="btn-secondary signout-btn">Sign Out</button>
       <div id="adminChip" class="account-chip" onclick="updateAdminProfile()" title="Click to update your name"></div>
     </div>
   </header>
+
+  <!-- Calendar Widget Below Header (Left aligned under logo) -->
+  <div class="calendar-widget-below-header">
+    <div id="currentDate"></div>
+  </div>
+
+  <!-- Main Navigation Bar for Core Accounting Features -->
+  <nav class="main-nav-bar">
+    <button onclick="window.location.href='admin.html'" class="nav-btn active" title="Go to Dashboard">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Dashboard</span>
+    </button>
+    <button onclick="window.location.href='chart-of-accounts.html'" class="nav-btn" title="Manage Chart of Accounts">
+      <span class="nav-icon">📊</span>
+      <span class="nav-label">Chart of Accounts</span>
+    </button>
+    <button onclick="window.location.href='journal.html'" class="nav-btn" title="Create and manage journal entries">
+      <span class="nav-icon">📝</span>
+      <span class="nav-label">Journal Entries</span>
+    </button>
+    <button onclick="window.location.href='account-ledger.html'" class="nav-btn" title="View account transaction ledgers">
+      <span class="nav-icon">📖</span>
+      <span class="nav-label">Account Ledger</span>
+    </button>
+    <button onclick="window.location.href='reports.html'" class="nav-btn" title="View financial reports and statements">
+      <span class="nav-icon">📈</span>
+      <span class="nav-label">Reports</span>
+    </button>
+  </nav>
 
   <main class="admin-dashboard">
     
@@ -49,8 +82,8 @@
           <div class="section-header">
             <h2>User Management</h2>
             <div class="action-buttons">
-              <button onclick="showCreateUserModal()">Create New User</button>
-              <button onclick="showBulkActionsModal()">Bulk Actions</button>
+              <button onclick="showCreateUserModal()" title="Create a new user account">Create New User</button>
+              <button onclick="showBulkActionsModal()" title="Perform actions on multiple users">Bulk Actions</button>
             </div>
           </div>
           
@@ -94,9 +127,9 @@
           </div>
           
           <div class="pagination-controls">
-            <button id="prevPage" onclick="changePage(-1)" disabled>Previous</button>
+            <button id="prevPage" onclick="changePage(-1)" disabled title="Go to previous page">Previous</button>
             <span id="pageInfo">Page 1 of 1</span>
-            <button id="nextPage" onclick="changePage(1)" disabled>Next</button>
+            <button id="nextPage" onclick="changePage(1)" disabled title="Go to next page">Next</button>
           </div>
         </section>
       </div>
@@ -125,21 +158,25 @@
         <section class="dashboard-section">
           <h3>Quick Actions</h3>
           <div class="quick-actions-grid">
-            <button onclick="showUserReport()" class="quick-action-btn">
-              <span class="action-icon">📊</span>
+            <button onclick="window.location.href='event-logs.html'" class="quick-action-btn" title="View event logs and audit trail">
+              <span class="action-icon">📜</span>
+              <span class="action-text">Event Logs</span>
+            </button>
+            <button onclick="showUserReport()" class="quick-action-btn" title="Generate and view user activity reports">
+              <span class="action-icon">📋</span>
               <span class="action-text">User Report</span>
             </button>
-            <button onclick="showEmailTool()" class="quick-action-btn">
+            <button onclick="showEmailTool()" class="quick-action-btn" title="Send email notifications to users">
               <span class="action-icon">✉️</span>
               <span class="action-text">Send Email</span>
             </button>
-            <button onclick="showSystemSettings()" class="quick-action-btn">
-              <span class="action-icon">⚙️</span>
-              <span class="action-text">Settings</span>
-            </button>
-            <button onclick="exportData()" class="quick-action-btn">
+            <button onclick="exportData()" class="quick-action-btn" title="Export system data to file">
               <span class="action-icon">💾</span>
               <span class="action-text">Export Data</span>
+            </button>
+            <button onclick="showSystemSettings()" class="quick-action-btn" title="Configure system settings">
+              <span class="action-icon">⚙️</span>
+              <span class="action-text">Settings</span>
             </button>
           </div>
         </section>
@@ -575,10 +612,50 @@
     </div>
   </div>
 
+  <!-- Calendar Picker Modal -->
+  <div id="calendarPickerModal" class="calendar-picker-modal">
+    <div class="calendar-picker">
+      <div class="calendar-header">
+        <button class="calendar-nav-btn" onclick="previousMonth()">‹</button>
+        <h3 id="calendarMonthYear">January 2025</h3>
+        <button class="calendar-nav-btn" onclick="nextMonth()">›</button>
+      </div>
+      <div id="calendarDays" class="calendar-days"></div>
+      <button class="calendar-close" onclick="closeCalendarPicker()">Close</button>
+    </div>
+  </div>
+
   <script type="module" src="js/firebaseConfig.js"></script>
   <script type="module" src="js/ui.js"></script>
   <script type="module" src="js/auth.js"></script>
+  <script src="js/help.js"></script>
   <script type="module" src="js/admin.js"></script>
   <script type="module" src="js/profile-picture.js"></script>
+  <script src="js/calendar-picker.js"></script>
+  <script>
+    // Update calendar - respects manually selected date
+    function updateCalendar() {
+      const dateEl = document.getElementById('currentDate');
+      if (dateEl && !isDateManuallySelected) {
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        dateEl.textContent = now.toLocaleDateString('en-US', options);
+      }
+    }
+    
+    // Update calendar every second (only if not manually selected)
+    setInterval(updateCalendar, 1000);
+    updateCalendar();
+    
+    // Sign out function
+    async function signOut() {
+      if (confirm('Are you sure you want to sign out?')) {
+        const { signOut: firebaseSignOut } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js');
+        const { auth } = await import('./js/firebaseConfig.js');
+        await firebaseSignOut(auth);
+        window.location.href = 'index.html';
+      }
+    }
+  </script>
 </body>
 </html>

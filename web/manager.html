@@ -2,80 +2,252 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>OpenBooks — Manager Dashboard</title>
+  <title>Manager Dashboard</title>
   <link rel="stylesheet" href="css/styles.css" />
 </head>
-<body>
+<body data-page="manager">
   <header class="site-header">
     <div class="header-left">
       <img src="assets/logo.svg" class="logo" />
       <h1>Manager Dashboard</h1>
     </div>
     <div class="header-right">
-      <div id="userChip" class="account-chip"></div>
+      <button onclick="showHelp()" class="help-btn" title="Access help documentation">
+        <span>❓</span> Help
+      </button>
+      <button onclick="signOut()" class="btn-secondary signout-btn">Sign Out</button>
+      <div id="adminChip" class="account-chip" onclick="updateAdminProfile()" title="Click to update your name"></div>
     </div>
   </header>
 
-  <main class="dashboard manager-dashboard">
-    <div class="dashboard-grid">
+  <!-- Calendar Widget Below Header (Left aligned under logo) -->
+  <div class="calendar-widget-below-header">
+    <div id="currentDate"></div>
+  </div>
+
+  <!-- Main Navigation Bar for Core Accounting Features -->
+  <nav class="main-nav-bar">
+    <button onclick="window.location.href='manager.html'" class="nav-btn active" title="Go to Dashboard">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Dashboard</span>
+    </button>
+    <button onclick="window.location.href='chart-of-accounts.html'" class="nav-btn" title="View Chart of Accounts">
+      <span class="nav-icon">📊</span>
+      <span class="nav-label">Chart of Accounts</span>
+    </button>
+    <button onclick="window.location.href='journal.html'" class="nav-btn" title="Create and manage journal entries">
+      <span class="nav-icon">📝</span>
+      <span class="nav-label">Journal Entries</span>
+    </button>
+    <button onclick="window.location.href='account-ledger.html'" class="nav-btn" title="View account transaction ledgers">
+      <span class="nav-icon">📖</span>
+      <span class="nav-label">Account Ledger</span>
+    </button>
+    <button onclick="window.location.href='reports.html'" class="nav-btn" title="View financial reports and statements">
+      <span class="nav-icon">📈</span>
+      <span class="nav-label">Reports</span>
+    </button>
+  </nav>
+
+  <main class="admin-dashboard">
+    
+    <!-- Top Summary Bar -->
+    <div class="dashboard-summary">
+      <div class="summary-stats">
+        <div class="stat-card">
+          <div class="stat-number" id="totalUsers">0</div>
+          <div class="stat-label">Total Users</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="activeUsers">0</div>
+          <div class="stat-label">Active Users</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="pendingRequests">0</div>
+          <div class="stat-label">Pending Requests</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="suspendedUsers">0</div>
+          <div class="stat-label">Suspended Users</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Dashboard Content -->
+    <div class="dashboard-main">
       
-      <section class="card team-overview">
-        <h2>Team Overview</h2>
-        <div id="teamStats" class="stats-grid">
-          <div class="stat-item">
-            <span class="stat-number" id="teamMemberCount">0</span>
-            <span class="stat-label">Team Members</span>
+      <!-- Left Column - User Management -->
+      <div class="dashboard-column main-column">
+        <section class="dashboard-section">
+          <div class="section-header">
+            <h2>User Management</h2>
           </div>
-          <div class="stat-item">
-            <span class="stat-number" id="activeUsersCount">0</span>
-            <span class="stat-label">Active Today</span>
+          
+          <div class="user-management-controls">
+            <div class="search-filter-bar">
+              <input type="text" id="userSearchInput" placeholder="Search users..." class="search-input">
+              <select id="roleFilter" class="filter-select">
+                <option value="">All Roles</option>
+                <option value="administrator">Administrator</option>
+                <option value="manager">Manager</option>
+                <option value="accountant">Accountant</option>
+              </select>
+              <select id="statusFilter" class="filter-select">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="suspended">Suspended</option>
+              </select>
+            </div>
           </div>
-        </div>
-      </section>
 
-      <section class="card team-members">
-        <h2>Team Members</h2>
-        <div class="table-container">
-          <table id="teamTable">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Username</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Last Login</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </section>
+          <div class="table-container">
+            <table id="usersTable" class="modern-table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Last Login</th>
+                  <th>Created</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Users will be loaded here -->
+              </tbody>
+            </table>
+            <div id="emptyState" class="empty-state" style="display: none;">
+              <p>No users found matching your criteria.</p>
+            </div>
+          </div>
+          
+          <div class="pagination-controls">
+            <button id="prevPage" onclick="changePage(-1)" disabled title="Go to previous page">Previous</button>
+            <span id="pageInfo">Page 1 of 1</span>
+            <button id="nextPage" onclick="changePage(1)" disabled title="Go to next page">Next</button>
+          </div>
+        </section>
+      </div>
 
-      <section class="card recent-activity">
-        <h2>Recent Activity</h2>
-        <div id="recentActivity" class="activity-list">
-          <!-- Activity items will be loaded here -->
-        </div>
-      </section>
-
-      <section class="card quick-actions">
-        <h2>Quick Actions</h2>
-        <div class="action-buttons">
-          <button onclick="showPasswordExpiryReport()">Password Expiry Report</button>
-          <button onclick="showLoginReport()">Login Activity Report</button>
-          <button onclick="showSystemSettings()">System Settings</button>
-        </div>
+      <!-- Right Column - Secondary Functions -->
+      <div class="dashboard-column sidebar-column">
         
-        <div class="system-actions">
-          <button id="signOut" class="sign-out-btn">Sign Out</button>
-        </div>
-      </section>
+        <!-- Pending Requests -->
+        <section class="dashboard-section">
+          <h3>Pending User Requests</h3>
+          <div class="table-container">
+            <table id="requestsTable" class="compact-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Role</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
 
+        <!-- Quick Actions -->
+        <section class="dashboard-section">
+          <h3>Quick Actions</h3>
+          <div class="quick-actions-grid">
+            <button onclick="window.location.href='event-logs.html'" class="quick-action-btn" title="View event logs and audit trail">
+              <span class="action-icon">📜</span>
+              <span class="action-text">Event Logs</span>
+            </button>
+            <button onclick="showUserReport()" class="quick-action-btn" title="Generate and view user activity reports">
+              <span class="action-icon">📋</span>
+              <span class="action-text">User Report</span>
+            </button>
+            <button onclick="showEmailTool()" class="quick-action-btn" title="Send email notifications to users">
+              <span class="action-icon">✉️</span>
+              <span class="action-text">Send Email</span>
+            </button>
+            <button onclick="exportData()" class="quick-action-btn" title="Export system data to file">
+              <span class="action-icon">💾</span>
+              <span class="action-text">Export Data</span>
+            </button>
+            <button onclick="showSystemSettings()" class="quick-action-btn" title="Configure system settings">
+              <span class="action-icon">⚙️</span>
+              <span class="action-text">Settings</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Recent Activity -->
+        <section class="dashboard-section">
+          <h3>Recent Activity</h3>
+          <div id="recentActivity" class="activity-list"></div>
+        </section>
+
+        <!-- Additional Reports -->
+        <section class="dashboard-section">
+          <h3>Additional Reports</h3>
+          <div class="report-links">
+            <button onclick="showPasswordExpiryReport()" class="report-link">Password Expiry Report</button>
+            <button onclick="showLoginReport()" class="report-link">Login Activity Report</button>
+            <button onclick="showSecurityReport()" class="report-link">Security Report</button>
+          </div>
+        </section>
+
+        <!-- System Actions -->
+        <section class="dashboard-section">
+          <div class="system-actions">
+            <button id="signOut" class="sign-out-btn">Sign Out</button>
+          </div>
+        </section>
+
+      </div>
     </div>
   </main>
 
+  <!-- Modal Dialogs -->
+  
+  <!-- Email Tool Modal -->
+  <div id="emailModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('emailModal')">&times;</span>
+      <h2>Send Email</h2>
+      <form id="emailForm">
+        <div class="field-group">
+          <label>Select Recipients</label>
+          <div class="email-recipients-container">
+            <input type="text" id="userSearch" placeholder="Search users by name or email..." />
+            <div class="selected-users" id="selectedUsers">
+              <!-- Selected users will appear here -->
+            </div>
+            <div class="user-list" id="userList">
+              <!-- Available users will appear here -->
+            </div>
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Subject *</label>
+          <input id="emailSubject" required />
+        </div>
+        <div class="field-group">
+          <label>Message *</label>
+          <textarea id="emailMessage" rows="6" required></textarea>
+        </div>
+        <button type="submit">Send Email</button>
+        <button type="button" onclick="closeModal('emailModal')" class="secondary">Cancel</button>
+        <div id="emailResult"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- User Report Modal -->
+  <div id="userReportModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('userReportModal')">&times;</span>
+      <h2>User Report</h2>
+      <div id="userReportContent"></div>
+    </div>
+  </div>
+
   <!-- Password Expiry Report Modal -->
-  <div id="passwordExpiryModal" class="modal" style="display: none;">
+  <div id="passwordExpiryModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeModal('passwordExpiryModal')">&times;</span>
       <h2>Password Expiry Report</h2>
@@ -84,11 +256,20 @@
   </div>
 
   <!-- Login Report Modal -->
-  <div id="loginReportModal" class="modal" style="display: none;">
+  <div id="loginReportModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeModal('loginReportModal')">&times;</span>
       <h2>Login Activity Report</h2>
       <div id="loginReportContent"></div>
+    </div>
+  </div>
+
+  <!-- Security Report Modal -->
+  <div id="securityReportModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('securityReportModal')">&times;</span>
+      <h2>Security Report</h2>
+      <div id="securityReportContent"></div>
     </div>
   </div>
 
@@ -169,9 +350,54 @@
     </div>
   </div>
 
+  <!-- Calendar Picker Modal -->
+  <div id="calendarPickerModal" class="calendar-picker-modal">
+    <div class="calendar-picker">
+      <div class="calendar-header">
+        <button class="calendar-nav-btn" onclick="previousMonth()">‹</button>
+        <h3 id="calendarMonthYear">January 2025</h3>
+        <button class="calendar-nav-btn" onclick="nextMonth()">›</button>
+      </div>
+      <div id="calendarDays" class="calendar-days"></div>
+      <button class="calendar-close" onclick="closeCalendarPicker()">Close</button>
+    </div>
+  </div>
+
   <script type="module" src="js/firebaseConfig.js"></script>
   <script type="module" src="js/ui.js"></script>
   <script type="module" src="js/auth.js"></script>
+  <script src="js/help.js"></script>
   <script type="module" src="js/manager.js"></script>
+  <script src="js/calendar-picker.js"></script>
+  <script>
+    // Update calendar - respects manually selected date
+    function updateCalendar() {
+      const dateEl = document.getElementById('currentDate');
+      if (dateEl && !isDateManuallySelected) {
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        dateEl.textContent = now.toLocaleDateString('en-US', options);
+      }
+    }
+    
+    // Update calendar every second (only if not manually selected)
+    setInterval(updateCalendar, 1000);
+    updateCalendar();
+    
+    // Sign out function
+    async function signOut() {
+      if (confirm('Are you sure you want to sign out?')) {
+        const { signOut: firebaseSignOut } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js');
+        const { auth } = await import('./js/firebaseConfig.js');
+        await firebaseSignOut(auth);
+        window.location.href = 'index.html';
+      }
+    }
+
+    // Update profile redirect
+    function updateAdminProfile() {
+      window.location.href = 'change-password.html';
+    }
+  </script>
 </body>
 </html>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chart of Accounts - OpenBooks</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="chart-of-accounts">
+  <div class="container">
+    <!-- Header -->
+    <header class="site-header">
+      <div class="header-left">
+        <img src="assets/logo.svg" alt="OpenBooks Logo" class="logo">
+        <h1>OpenBooks</h1>
+      </div>
+      <div class="header-right">
+        <button onclick="showHelp()" class="help-btn" title="Access help documentation">
+          <span>❓</span> Help
+        </button>
+        <button onclick="signOut()" class="btn-secondary signout-btn">Sign Out</button>
+        <div id="userChip" class="user-chip"></div>
+      </div>
+    </header>
+
+    <!-- Calendar Widget Below Header (Left aligned under logo) -->
+    <div class="calendar-widget-below-header">
+      <div id="currentDate"></div>
+    </div>
+
+    <!-- Main Navigation Bar for Core Accounting Features -->
+    <nav class="main-nav-bar">
+      <button onclick="navigateToDashboard()" class="nav-btn" title="Go to Dashboard">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Dashboard</span>
+      </button>
+      <button onclick="window.location.href='chart-of-accounts.html'" class="nav-btn active" title="Manage Chart of Accounts">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Chart of Accounts</span>
+      </button>
+      <button onclick="window.location.href='journal.html'" class="nav-btn" title="Create and manage journal entries">
+        <span class="nav-icon">📝</span>
+        <span class="nav-label">Journal Entries</span>
+      </button>
+      <button onclick="window.location.href='account-ledger.html'" class="nav-btn" title="View account transaction ledgers">
+        <span class="nav-icon">📖</span>
+        <span class="nav-label">Account Ledger</span>
+      </button>
+      <button onclick="window.location.href='reports.html'" class="nav-btn" title="View financial reports and statements">
+        <span class="nav-icon">📈</span>
+        <span class="nav-label">Reports</span>
+      </button>
+    </nav>
+
+    <main class="main-content">
+      <div class="page-header">
+        <h2>Chart of Accounts</h2>
+        <div class="header-actions">
+          <button onclick="showAddAccountModal()" class="btn-primary admin-only" title="Add New Account">
+            ➕ Add Account
+          </button>
+          <button onclick="loadChartOfAccounts()" class="btn-secondary" title="Refresh Accounts">
+            🔄 Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- Statistics Dashboard -->
+      <div id="accountStats" class="stats-grid"></div>
+
+      <!-- Filters Section -->
+      <div class="filters-section">
+        <h3>Search & Filter</h3>
+        <div class="filter-controls">
+          <div class="filter-group">
+            <label>Search:</label>
+            <input type="text" id="searchAccount" placeholder="Search by name or number..." onkeyup="applyFilters()">
+          </div>
+          <div class="filter-group">
+            <label>Category:</label>
+            <select id="filterCategory" onchange="applyFilters()">
+              <option value="">All Categories</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Subcategory:</label>
+            <select id="filterSubcategory" onchange="applyFilters()">
+              <option value="">All Subcategories</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Statement:</label>
+            <select id="filterStatement" onchange="applyFilters()">
+              <option value="">All Statements</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Min Balance:</label>
+            <input type="number" id="filterMinBalance" step="0.01" placeholder="$0.00" onkeyup="applyFilters()">
+          </div>
+          <div class="filter-group">
+            <label>Max Balance:</label>
+            <input type="number" id="filterMaxBalance" step="0.01" placeholder="$0.00" onkeyup="applyFilters()">
+          </div>
+          <button onclick="clearFilters()" class="btn-secondary" title="Clear All Filters">
+            ✖️ Clear Filters
+          </button>
+        </div>
+      </div>
+
+      <!-- Accounts Table -->
+      <div class="table-container">
+        <table id="accountsTable" class="data-table">
+          <thead>
+            <tr>
+              <th title="Display order in chart">Order</th>
+              <th title="Unique account number">Number</th>
+              <th title="Account name">Name</th>
+              <th title="Account category">Category</th>
+              <th title="Account subcategory">Subcategory</th>
+              <th title="Total debits">Debit</th>
+              <th title="Total credits">Credit</th>
+              <th title="Current balance">Balance</th>
+              <th title="Financial statement">Statement</th>
+              <th title="Account status">Status</th>
+              <th title="Available actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="11" style="text-align: center;">Loading accounts...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add Account Modal -->
+  <div id="addAccountModal" class="modal">
+    <div class="modal-content">
+      <h3>Add New Account</h3>
+      <form id="addAccountForm" onsubmit="saveNewAccount(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Account Name: <span class="required">*</span></label>
+            <input type="text" id="newAccountName" required>
+          </div>
+
+          <div class="form-group">
+            <label>Account Number: <span class="required">*</span></label>
+            <input type="text" id="newAccountNumber" required pattern="\d+" title="Numbers only, no decimals">
+          </div>
+
+          <div class="form-group">
+            <label>Category: <span class="required">*</span></label>
+            <select id="newAccountCategory" onchange="updateSubcategories('newAccountCategory', 'newAccountSubcategory')" required>
+              <option value="">Select Category</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Subcategory:</label>
+            <select id="newAccountSubcategory">
+              <option value="">Select Subcategory</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Normal Side:</label>
+            <input type="text" id="newAccountNormalSide" readonly>
+          </div>
+
+          <div class="form-group">
+            <label>Statement:</label>
+            <select id="newAccountStatement">
+              <option value="BS">BS - Balance Sheet</option>
+              <option value="IS">IS - Income Statement</option>
+              <option value="RE">RE - Retained Earnings</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Initial Balance:</label>
+            <input type="number" id="newAccountInitialBalance" step="0.01" value="0.00">
+          </div>
+
+          <div class="form-group">
+            <label>Order:</label>
+            <input type="number" id="newAccountOrder" value="0">
+          </div>
+
+          <div class="form-group full-width">
+            <label>Description:</label>
+            <textarea id="newAccountDescription" rows="2"></textarea>
+          </div>
+
+          <div class="form-group full-width">
+            <label>Comment:</label>
+            <textarea id="newAccountComment" rows="2"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="submit" class="btn-primary">Save Account</button>
+          <button type="button" onclick="closeModal('addAccountModal')" class="btn-secondary">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Account Modal -->
+  <div id="editAccountModal" class="modal">
+    <div class="modal-content">
+      <h3>Edit Account</h3>
+      <form id="editAccountForm" onsubmit="saveEditedAccount(event)">
+        <input type="hidden" id="editAccountId">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Account Name: <span class="required">*</span></label>
+            <input type="text" id="editAccountName" required>
+          </div>
+
+          <div class="form-group">
+            <label>Account Number: <span class="required">*</span></label>
+            <input type="text" id="editAccountNumber" required pattern="\d+" title="Numbers only, no decimals">
+          </div>
+
+          <div class="form-group">
+            <label>Category: <span class="required">*</span></label>
+            <select id="editAccountCategory" onchange="updateSubcategories('editAccountCategory', 'editAccountSubcategory')" required>
+              <option value="">Select Category</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Subcategory:</label>
+            <select id="editAccountSubcategory">
+              <option value="">Select Subcategory</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Normal Side:</label>
+            <input type="text" id="editAccountNormalSide" readonly>
+          </div>
+
+          <div class="form-group">
+            <label>Statement:</label>
+            <select id="editAccountStatement">
+              <option value="BS">BS - Balance Sheet</option>
+              <option value="IS">IS - Income Statement</option>
+              <option value="RE">RE - Retained Earnings</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Current Balance:</label>
+            <input type="text" id="editAccountBalance" readonly>
+          </div>
+
+          <div class="form-group">
+            <label>Order:</label>
+            <input type="number" id="editAccountOrder" value="0">
+          </div>
+
+          <div class="form-group full-width">
+            <label>Description:</label>
+            <textarea id="editAccountDescription" rows="2"></textarea>
+          </div>
+
+          <div class="form-group full-width">
+            <label>Comment:</label>
+            <textarea id="editAccountComment" rows="2"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="submit" class="btn-primary">Save Changes</button>
+          <button type="button" onclick="closeModal('editAccountModal')" class="btn-secondary">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Calendar Picker Modal -->
+  <div id="calendarPickerModal" class="calendar-picker-modal">
+    <div class="calendar-picker">
+      <div class="calendar-header">
+        <button class="calendar-nav-btn" onclick="previousMonth()">‹</button>
+        <h3 id="calendarMonthYear">January 2025</h3>
+        <button class="calendar-nav-btn" onclick="nextMonth()">›</button>
+      </div>
+      <div id="calendarDays" class="calendar-days"></div>
+      <button class="calendar-close" onclick="closeCalendarPicker()">Close</button>
+    </div>
+  </div>
+
+  <script type="module" src="js/chart-of-accounts.js"></script>
+  <script src="js/calendar-picker.js"></script>
+  <script>
+    // Update calendar - respects manually selected date
+    function updateCalendar() {
+      const dateEl = document.getElementById('currentDate');
+      if (dateEl && !isDateManuallySelected) {
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        dateEl.textContent = now.toLocaleDateString('en-US', options);
+      }
+    }
+    
+    // Update calendar every second (only if not manually selected)
+    setInterval(updateCalendar, 1000);
+    updateCalendar();
+    
+    // Sign out function
+    async function signOut() {
+      if (confirm('Are you sure you want to sign out?')) {
+        const { signOut: firebaseSignOut } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js');
+        const { auth } = await import('./js/firebaseConfig.js');
+        await firebaseSignOut(auth);
+        window.location.href = 'index.html';
+      }
+    }
+  </script>
+  <script src="js/help.js"></script>
+</body>
+</html>

@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Help Documentation - OpenBooks</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .help-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    .help-sidebar {
+      position: fixed;
+      left: 20px;
+      top: 150px;
+      width: 250px;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      max-height: calc(100vh - 200px);
+      overflow-y: auto;
+    }
+    
+    .help-sidebar h3 {
+      margin-top: 0;
+      color: var(--gray-100);
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .help-sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .help-sidebar li {
+      margin-bottom: 0.5rem;
+    }
+    
+    .help-sidebar a {
+      color: var(--gray-300);
+      text-decoration: none;
+      transition: var(--transition);
+      display: block;
+      padding: 0.5rem;
+      border-radius: var(--radius);
+    }
+    
+    .help-sidebar a:hover,
+    .help-sidebar a.active {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .help-content {
+      margin-left: 300px;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+    }
+    
+    .help-section {
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--gray-700);
+    }
+    
+    .help-section:last-child {
+      border-bottom: none;
+    }
+    
+    .help-section h2 {
+      color: var(--gray-50);
+      margin-top: 0;
+      margin-bottom: 1rem;
+    }
+    
+    .help-section h3 {
+      color: var(--gray-200);
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .help-section p {
+      color: var(--gray-300);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    
+    .help-section ul, .help-section ol {
+      color: var(--gray-300);
+      line-height: 1.8;
+      margin-left: 1.5rem;
+    }
+    
+    .help-section code {
+      background: var(--bg-secondary);
+      padding: 0.2rem 0.5rem;
+      border-radius: var(--radius-sm);
+      color: var(--accent);
+      font-family: var(--font-mono);
+    }
+    
+    .help-note {
+      background: rgba(6, 182, 212, 0.1);
+      border-left: 4px solid var(--info);
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: var(--radius);
+    }
+    
+    .help-warning {
+      background: rgba(245, 158, 11, 0.1);
+      border-left: 4px solid var(--warning);
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: var(--radius);
+    }
+    
+    @media (max-width: 768px) {
+      .help-sidebar {
+        position: static;
+        width: 100%;
+        margin-bottom: 2rem;
+      }
+      
+      .help-content {
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="header-left">
+        <img src="assets/logo.svg" alt="OpenBooks Logo" class="logo">
+        <h1>OpenBooks Help</h1>
+      </div>
+      <div class="header-right">
+        <button onclick="window.history.back()" class="btn-secondary" title="Go back to previous page">← Back</button>
+        <button onclick="navigateToDashboard()" class="btn-primary" title="Go to Dashboard">Dashboard</button>
+      </div>
+    </header>
+
+    <!-- Main Navigation Bar for Core Accounting Features -->
+    <nav class="main-nav-bar">
+      <button onclick="navigateToDashboard()" class="nav-btn" title="Go to Dashboard">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Dashboard</span>
+      </button>
+      <button onclick="window.location.href='chart-of-accounts.html'" class="nav-btn" title="Manage Chart of Accounts">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Chart of Accounts</span>
+      </button>
+      <button onclick="window.location.href='journal.html'" class="nav-btn" title="Create and manage journal entries">
+        <span class="nav-icon">📝</span>
+        <span class="nav-label">Journal Entries</span>
+      </button>
+      <button onclick="window.location.href='account-ledger.html'" class="nav-btn" title="View account transaction ledgers">
+        <span class="nav-icon">📖</span>
+        <span class="nav-label">Account Ledger</span>
+      </button>
+      <button onclick="window.location.href='reports.html'" class="nav-btn" title="View financial reports and statements">
+        <span class="nav-icon">📈</span>
+        <span class="nav-label">Reports</span>
+      </button>
+      <button onclick="window.location.href='help.html'" class="nav-btn active" title="Access help documentation">
+        <span class="nav-icon">❓</span>
+        <span class="nav-label">Help</span>
+      </button>
+    </nav>
+
+    <div class="help-container">
+      <!-- Sidebar Navigation -->
+      <aside class="help-sidebar">
+        <h3>Topics</h3>
+        <ul>
+          <li><a href="#getting-started">Getting Started</a></li>
+          <li><a href="#user-management">User Management</a></li>
+          <li><a href="#chart-of-accounts">Chart of Accounts</a></li>
+          <li><a href="#account-types">Account Types & Numbers</a></li>
+          <li><a href="#journal-entries">Journal Entries</a></li>
+          <li><a href="#reports">Financial Reports</a></li>
+          <li><a href="#security">Security Features</a></li>
+          <li><a href="#event-logs">Event Logs & Audit Trail</a></li>
+          <li><a href="#troubleshooting">Troubleshooting</a></li>
+          <li><a href="#faqs">FAQs</a></li>
+        </ul>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="help-content">
+        <!-- Getting Started -->
+        <section id="getting-started" class="help-section">
+          <h2>📚 Getting Started with OpenBooks</h2>
+          <p>Welcome to OpenBooks, a comprehensive accounting and user management system designed for small to medium businesses.</p>
+          
+          <h3>System Overview</h3>
+          <p>OpenBooks provides:</p>
+          <ul>
+            <li>Complete user management system with role-based access control</li>
+            <li>Chart of Accounts for organizing financial data</li>
+            <li>Account ledgers for tracking transactions</li>
+            <li>Comprehensive event logging for audit trails</li>
+            <li>Secure authentication with password history tracking</li>
+          </ul>
+
+          <h3>User Roles</h3>
+          <ul>
+            <li><strong>Administrator:</strong> Full system access - can manage users, accounts, and all financial data</li>
+            <li><strong>Manager:</strong> Can view accounts and perform most services except account management</li>
+            <li><strong>Accountant:</strong> Can view accounts and perform accounting tasks but cannot manage accounts</li>
+          </ul>
+        </section>
+
+        <!-- User Management -->
+        <section id="user-management" class="help-section">
+          <h2>👥 User Management</h2>
+          
+          <h3>Creating New Users (Administrator Only)</h3>
+          <ol>
+            <li>Navigate to the Admin Dashboard</li>
+            <li>Click "Create New User" button</li>
+            <li>Fill in required information:
+              <ul>
+                <li>First Name and Last Name (automatically capitalized)</li>
+                <li>Email address</li>
+                <li>Role (Administrator, Manager, or Accountant)</li>
+                <li>Phone, Date of Birth, Address</li>
+              </ul>
+            </li>
+            <li>System generates a secure username and password</li>
+            <li>Save the credentials and provide them to the new user</li>
+          </ol>
+
+          <div class="help-note">
+            <strong>Note:</strong> Users must change their password on first login and set up security questions for account recovery.
+          </div>
+
+          <h3>Editing Users</h3>
+          <p>Administrators can modify user information, suspend accounts, or change roles. User edits are logged in the event log.</p>
+
+          <h3>Password Management</h3>
+          <p>OpenBooks includes robust password security:</p>
+          <ul>
+            <li>Minimum 8 characters</li>
+            <li>Must start with a letter</li>
+            <li>Requires numbers and special characters</li>
+            <li>Cannot reuse last 12 passwords</li>
+            <li>Passwords expire after 90 days</li>
+          </ul>
+        </section>
+
+        <!-- Chart of Accounts -->
+        <section id="chart-of-accounts" class="help-section">
+          <h2>📊 Chart of Accounts</h2>
+          
+          <h3>Overview</h3>
+          <p>The Chart of Accounts is the foundation of your accounting system. It organizes all financial accounts into categories for easy tracking and reporting.</p>
+
+          <h3>Adding a New Account (Administrator Only)</h3>
+          <ol>
+            <li>Navigate to Chart of Accounts</li>
+            <li>Click "Add Account" button</li>
+            <li>Enter required information:
+              <ul>
+                <li>Account Name (must be unique)</li>
+                <li>Account Number (must be within valid range for category)</li>
+                <li>Category (Assets, Liabilities, Equity, Revenue, Expenses)</li>
+                <li>Subcategory (optional)</li>
+                <li>Initial Balance (if any)</li>
+                <li>Statement type (BS, IS, or RE)</li>
+                <li>Display Order</li>
+              </ul>
+            </li>
+            <li>System automatically determines Normal Side based on category</li>
+            <li>Click "Save Account"</li>
+          </ol>
+
+          <div class="help-warning">
+            <strong>Important:</strong> Account numbers must be numeric only (no decimals or letters). Duplicate account names or numbers are not allowed.
+          </div>
+
+          <h3>Searching and Filtering</h3>
+          <p>Use the filter controls to find accounts:</p>
+          <ul>
+            <li><strong>Search:</strong> Find accounts by name or number</li>
+            <li><strong>Category Filter:</strong> Show only specific account types</li>
+            <li><strong>Statement Filter:</strong> Filter by financial statement</li>
+            <li><strong>Balance Range:</strong> Find accounts within specific balance amounts</li>
+          </ul>
+
+          <h3>Viewing Account Ledgers</h3>
+          <p>Click any account in the Chart of Accounts to view its detailed ledger showing all transactions posted to that account.</p>
+
+          <h3>Deactivating Accounts</h3>
+          <p>Administrators can deactivate accounts, but only if the account balance is zero. This prevents accidental deactivation of accounts with transactions.</p>
+        </section>
+
+        <!-- Account Types -->
+        <section id="account-types" class="help-section">
+          <h2>🔢 Account Types & Number Ranges</h2>
+          
+          <p>OpenBooks uses a standardized account numbering system:</p>
+
+          <h3>Assets (1000-1999)</h3>
+          <ul>
+            <li>Normal Side: Debit</li>
+            <li>Subcategories: Current Assets, Fixed Assets, Other Assets</li>
+            <li>Examples: Cash (1000), Accounts Receivable (1100), Equipment (1500)</li>
+          </ul>
+
+          <h3>Liabilities (2000-2999)</h3>
+          <ul>
+            <li>Normal Side: Credit</li>
+            <li>Subcategories: Current Liabilities, Long-term Liabilities</li>
+            <li>Examples: Accounts Payable (2000), Notes Payable (2100)</li>
+          </ul>
+
+          <h3>Equity (3000-3999)</h3>
+          <ul>
+            <li>Normal Side: Credit</li>
+            <li>Subcategories: Owner's Equity, Retained Earnings</li>
+            <li>Examples: Capital (3000), Retained Earnings (3100)</li>
+          </ul>
+
+          <h3>Revenue (4000-4999)</h3>
+          <ul>
+            <li>Normal Side: Credit</li>
+            <li>Subcategories: Operating Revenue, Other Revenue</li>
+            <li>Examples: Sales Revenue (4000), Service Revenue (4100)</li>
+          </ul>
+
+          <h3>Expenses (5000-5999)</h3>
+          <ul>
+            <li>Normal Side: Debit</li>
+            <li>Subcategories: Operating Expenses, Other Expenses</li>
+            <li>Examples: Salaries Expense (5000), Rent Expense (5100)</li>
+          </ul>
+        </section>
+
+        <!-- Journal Entries -->
+        <section id="journal-entries" class="help-section">
+          <h2>📝 Journal Entries</h2>
+          <p>Journal entries record financial transactions in the accounting system. This feature will be available in the full version.</p>
+          
+          <h3>Recording Transactions</h3>
+          <p>When recording journal entries:</p>
+          <ul>
+            <li>Every entry must have equal debits and credits</li>
+            <li>Include a clear description</li>
+            <li>Reference supporting documentation</li>
+            <li>Date accurately</li>
+          </ul>
+        </section>
+
+        <!-- Reports -->
+        <section id="reports" class="help-section">
+          <h2>📈 Financial Reports</h2>
+          <p>Generate comprehensive financial reports to analyze business performance:</p>
+          <ul>
+            <li><strong>Balance Sheet (BS):</strong> Shows assets, liabilities, and equity</li>
+            <li><strong>Income Statement (IS):</strong> Shows revenues and expenses</li>
+            <li><strong>Retained Earnings (RE):</strong> Shows changes in retained earnings</li>
+            <li><strong>Trial Balance:</strong> Verifies debits equal credits</li>
+          </ul>
+        </section>
+
+        <!-- Security -->
+        <section id="security" class="help-section">
+          <h2>🔒 Security Features</h2>
+          
+          <h3>Authentication</h3>
+          <p>OpenBooks uses Firebase Authentication for secure user login with:</p>
+          <ul>
+            <li>Encrypted password storage</li>
+            <li>Session management</li>
+            <li>Account suspension after 3 failed login attempts</li>
+          </ul>
+
+          <h3>Security Questions</h3>
+          <p>All users must set up security questions for password recovery. Questions and answers are securely hashed.</p>
+
+          <h3>Password Recovery</h3>
+          <ol>
+            <li>Click "Forgot Password" on login page</li>
+            <li>Enter email and User ID</li>
+            <li>Answer security questions</li>
+            <li>Receive password reset email</li>
+            <li>Set new password (cannot reuse previous 12 passwords)</li>
+          </ol>
+        </section>
+
+        <!-- Event Logs -->
+        <section id="event-logs" class="help-section">
+          <h2>📋 Event Logs & Audit Trail</h2>
+          
+          <p>OpenBooks maintains a comprehensive audit trail of all system changes:</p>
+
+          <h3>What is Logged</h3>
+          <ul>
+            <li>Account additions, modifications, and deactivations</li>
+            <li>User creation and editing</li>
+            <li>Login attempts and password changes</li>
+            <li>All administrative actions</li>
+          </ul>
+
+          <h3>Event Log Information</h3>
+          <p>Each event log entry includes:</p>
+          <ul>
+            <li>Unique event ID</li>
+            <li>Event type and description</li>
+            <li>Before and after images of changed data</li>
+            <li>User ID and username of person making change</li>
+            <li>Date and time stamp</li>
+          </ul>
+
+          <div class="help-note">
+            <strong>Compliance:</strong> Event logs support regulatory compliance and internal auditing requirements.
+          </div>
+        </section>
+
+        <!-- Troubleshooting -->
+        <section id="troubleshooting" class="help-section">
+          <h2>🔧 Troubleshooting</h2>
+          
+          <h3>Cannot Login</h3>
+          <ul>
+            <li>Verify username and password are correct</li>
+            <li>Check if account is suspended (contact administrator)</li>
+            <li>Use "Forgot Password" if you don't remember password</li>
+          </ul>
+
+          <h3>Cannot Add Account</h3>
+          <ul>
+            <li>Verify account number is in correct range for category</li>
+            <li>Ensure account number and name are unique</li>
+            <li>Check that you're logged in as Administrator</li>
+          </ul>
+
+          <h3>Cannot Deactivate Account</h3>
+          <ul>
+            <li>Account balance must be zero before deactivation</li>
+            <li>Post journal entries to bring balance to zero first</li>
+          </ul>
+        </section>
+
+        <!-- FAQs -->
+        <section id="faqs" class="help-section">
+          <h2>❓ Frequently Asked Questions</h2>
+          
+          <h3>Q: How often should I change my password?</h3>
+          <p>A: Passwords automatically expire after 90 days. The system will prompt you to change it.</p>
+
+          <h3>Q: Can I use the same password again?</h3>
+          <p>A: No, the system prevents reuse of your last 12 passwords for security.</p>
+
+          <h3>Q: What happens if I forget my security question answers?</h3>
+          <p>A: Contact your system administrator who can manually reset your password.</p>
+
+          <h3>Q: Why can't I see the "Add Account" button?</h3>
+          <p>A: Only Administrators can add, edit, or deactivate accounts. Managers and Accountants have view-only access.</p>
+
+          <h3>Q: How do I know which account number to use?</h3>
+          <p>A: Use the Account Types section of this help guide. Each category has a specific number range (e.g., Assets are 1000-1999).</p>
+
+          <h3>Q: Can I delete an account?</h3>
+          <p>A: No, accounts cannot be deleted. You can only deactivate them if the balance is zero. This maintains data integrity.</p>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // Smooth scrolling for sidebar links
+    document.querySelectorAll('.help-sidebar a').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          
+          // Update active link
+          document.querySelectorAll('.help-sidebar a').forEach(a => a.classList.remove('active'));
+          this.classList.add('active');
+        }
+      });
+    });
+
+    // Highlight current section on scroll
+    window.addEventListener('scroll', () => {
+      const sections = document.querySelectorAll('.help-section');
+      const scrollPos = window.scrollY + 200;
+
+      sections.forEach(section => {
+        if (scrollPos >= section.offsetTop) {
+          const id = section.getAttribute('id');
+          document.querySelectorAll('.help-sidebar a').forEach(a => a.classList.remove('active'));
+          document.querySelector(`.help-sidebar a[href="#${id}"]`)?.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,3 +1,7 @@
+import { auth, db } from './firebaseConfig.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
+import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
+
 export function byId(id) { return document.getElementById(id); }
 export function setChip(el, { displayName, photoURL, username, firstName, lastName }) {
   el.innerHTML = "";
@@ -155,3 +159,41 @@ export function closeAllModals() {
 window.showModal = showModal;
 window.closeModal = closeModal;
 window.closeAllModals = closeAllModals;
+
+// Navigate to appropriate dashboard based on user role
+export async function navigateToDashboard() {
+  try {
+    const user = auth.currentUser;
+    if (!user) {
+      window.location.href = 'index.html';
+      return;
+    }
+
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    if (!userDoc.exists()) {
+      window.location.href = 'index.html';
+      return;
+    }
+
+    const userData = userDoc.data();
+    const role = userData.role;
+
+    // Navigate to correct dashboard based on role
+    if (role === 'administrator') {
+      window.location.href = 'admin.html';
+    } else if (role === 'manager') {
+      window.location.href = 'manager.html';
+    } else if (role === 'accountant') {
+      window.location.href = 'app.html';
+    } else {
+      // Unknown role, redirect to login
+      window.location.href = 'index.html';
+    }
+  } catch (error) {
+    console.error('Error navigating to dashboard:', error);
+    window.location.href = 'index.html';
+  }
+}
+
+// Attach to window for HTML onclick handlers
+window.navigateToDashboard = navigateToDashboard;

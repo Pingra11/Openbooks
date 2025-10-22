@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Journal Entries - OpenBooks</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="journal">
+  <div class="container">
+    <!-- Header -->
+    <header class="site-header">
+      <div class="header-left">
+        <img src="assets/logo.svg" alt="OpenBooks Logo" class="logo">
+        <h1>OpenBooks</h1>
+      </div>
+      <div class="header-right">
+        <button onclick="showHelp()" class="help-btn" title="Access help documentation">
+          <span>❓</span> Help
+        </button>
+        <button onclick="signOut()" class="btn-secondary signout-btn">Sign Out</button>
+        <div id="userChip" class="user-chip"></div>
+      </div>
+    </header>
+
+    <!-- Calendar Widget Below Header (Left aligned under logo) -->
+    <div class="calendar-widget-below-header">
+      <div id="currentDate"></div>
+    </div>
+
+    <!-- Main Navigation Bar for Core Accounting Features -->
+    <nav class="main-nav-bar">
+      <button onclick="navigateToDashboard()" class="nav-btn" title="Go to Dashboard">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Dashboard</span>
+      </button>
+      <button onclick="window.location.href='chart-of-accounts.html'" class="nav-btn" title="Manage Chart of Accounts">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Chart of Accounts</span>
+      </button>
+      <button onclick="window.location.href='journal.html'" class="nav-btn active" title="Create and manage journal entries">
+        <span class="nav-icon">📝</span>
+        <span class="nav-label">Journal Entries</span>
+      </button>
+      <button onclick="window.location.href='account-ledger.html'" class="nav-btn" title="View account transaction ledgers">
+        <span class="nav-icon">📖</span>
+        <span class="nav-label">Account Ledger</span>
+      </button>
+      <button onclick="window.location.href='reports.html'" class="nav-btn" title="View financial reports and statements">
+        <span class="nav-icon">📈</span>
+        <span class="nav-label">Reports</span>
+      </button>
+    </nav>
+
+    <main class="main-content">
+      <div class="page-header">
+        <h2>Journal Entries</h2>
+        <div>
+          <button id="newEntryBtn" onclick="showNewEntryModal()" class="btn-primary" title="Create New Journal Entry">
+            ➕ New Entry
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter Controls -->
+      <div class="filter-section">
+        <div class="filters-grid">
+          <div class="filter-group">
+            <label>Search:</label>
+            <input type="text" id="searchEntry" placeholder="Entry #, Description..." onkeyup="applyFilters()">
+          </div>
+          <div class="filter-group">
+            <label>Status:</label>
+            <select id="filterStatus" onchange="applyFilters()">
+              <option value="">All Statuses</option>
+              <option value="draft">Draft</option>
+              <option value="posted">Posted</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>From Date:</label>
+            <input type="date" id="filterFromDate" onchange="applyFilters()">
+          </div>
+          <div class="filter-group">
+            <label>To Date:</label>
+            <input type="date" id="filterToDate" onchange="applyFilters()">
+          </div>
+          <button onclick="clearFilters()" class="btn-secondary" title="Clear All Filters">
+            ✖️ Clear Filters
+          </button>
+        </div>
+      </div>
+
+      <!-- Journal Entries Table -->
+      <div class="table-container">
+        <table id="journalTable" class="data-table">
+          <thead>
+            <tr>
+              <th>Entry #</th>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Status</th>
+              <th>Total Amount</th>
+              <th>Created By</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="7" style="text-align: center;">Loading journal entries...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- New/Edit Journal Entry Modal -->
+  <div id="journalEntryModal" class="modal">
+    <div class="modal-content modal-wide">
+      <div class="modal-header">
+        <h3 id="modalTitle">New Journal Entry</h3>
+        <span class="close" onclick="closeJournalModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <form id="journalEntryForm">
+          <input type="hidden" id="entryId">
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="entryDate">Date: *</label>
+              <input type="date" id="entryDate" required>
+            </div>
+            <div class="form-group">
+              <label for="entryReference">Reference #:</label>
+              <input type="text" id="entryReference" placeholder="Invoice #, Check #, etc.">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="entryDescription">Description: *</label>
+            <textarea id="entryDescription" rows="2" required placeholder="Brief description of the transaction"></textarea>
+          </div>
+
+          <hr style="margin: 1.5rem 0; border-color: var(--gray-700);">
+
+          <div class="form-group">
+            <label>Line Items:</label>
+            <div id="lineItemsContainer">
+              <!-- Line items will be added here dynamically -->
+            </div>
+            <button type="button" onclick="addLineItem()" class="btn-secondary" style="margin-top: 0.5rem;">
+              ➕ Add Line Item
+            </button>
+          </div>
+
+          <div class="entry-totals">
+            <div class="totals-grid">
+              <div>
+                <strong>Total Debits:</strong>
+                <span id="totalDebits" class="total-amount">$0.00</span>
+              </div>
+              <div>
+                <strong>Total Credits:</strong>
+                <span id="totalCredits" class="total-amount">$0.00</span>
+              </div>
+              <div>
+                <strong>Difference:</strong>
+                <span id="totalDifference" class="total-amount">$0.00</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" onclick="closeJournalModal()" class="btn-secondary">Cancel</button>
+            <button type="button" id="saveDraftBtn" onclick="saveJournalEntry('draft')" class="btn-secondary">
+              💾 Save Draft
+            </button>
+            <button type="button" id="postEntryBtn" onclick="saveJournalEntry('posted')" class="btn-primary">
+              ✓ Post Entry
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Journal Entry Modal -->
+  <div id="viewEntryModal" class="modal">
+    <div class="modal-content modal-wide">
+      <div class="modal-header">
+        <h3>Journal Entry Details</h3>
+        <span class="close" onclick="closeViewModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div id="viewEntryContent">
+          <!-- Entry details will be loaded here -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeViewModal()" class="btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calendar Picker Modal -->
+  <div id="calendarPickerModal" class="calendar-picker-modal">
+    <div class="calendar-picker">
+      <div class="calendar-header">
+        <button class="calendar-nav-btn" onclick="previousMonth()">‹</button>
+        <h3 id="calendarMonthYear">January 2025</h3>
+        <button class="calendar-nav-btn" onclick="nextMonth()">›</button>
+      </div>
+      <div id="calendarDays" class="calendar-days"></div>
+      <button class="calendar-close" onclick="closeCalendarPicker()">Close</button>
+    </div>
+  </div>
+
+  <script type="module" src="js/journal.js"></script>
+  <script src="js/calendar-picker.js"></script>
+  <script>
+    // Update calendar - respects manually selected date
+    function updateCalendar() {
+      const dateEl = document.getElementById('currentDate');
+      if (dateEl && !isDateManuallySelected) {
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        dateEl.textContent = now.toLocaleDateString('en-US', options);
+      }
+    }
+    
+    setInterval(updateCalendar, 1000);
+    updateCalendar();
+    
+    async function signOut() {
+      if (confirm('Are you sure you want to sign out?')) {
+        const { signOut: firebaseSignOut } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js');
+        const { auth } = await import('./js/firebaseConfig.js');
+        await firebaseSignOut(auth);
+        window.location.href = 'index.html';
+      }
+    }
+  </script>
+  <script src="js/help.js"></script>
+</body>
+</html>

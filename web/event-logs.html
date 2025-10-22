@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Logs - OpenBooks</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="event-logs">
+  <div class="container">
+    <!-- Header -->
+    <header class="site-header">
+      <div class="header-left">
+        <img src="assets/logo.svg" alt="OpenBooks Logo" class="logo">
+        <h1>OpenBooks</h1>
+      </div>
+      <div class="header-right">
+        <button onclick="showHelp()" class="help-btn" title="Access help documentation">
+          <span>❓</span> Help
+        </button>
+        <button onclick="signOut()" class="btn-secondary signout-btn">Sign Out</button>
+        <div id="userChip" class="user-chip"></div>
+      </div>
+    </header>
+
+    <!-- Calendar Widget Below Header (Left aligned under logo) -->
+    <div class="calendar-widget-below-header">
+      <div id="currentDate"></div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <nav class="main-nav-bar">
+      <button onclick="navigateToDashboard()" class="nav-btn" title="Go to Dashboard">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Dashboard</span>
+      </button>
+      <button onclick="window.location.href='chart-of-accounts.html'" class="nav-btn" title="Manage Chart of Accounts">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Chart of Accounts</span>
+      </button>
+      <button onclick="window.location.href='journal.html'" class="nav-btn" title="Create and manage journal entries">
+        <span class="nav-icon">📝</span>
+        <span class="nav-label">Journal Entries</span>
+      </button>
+      <button onclick="window.location.href='account-ledger.html'" class="nav-btn" title="View account transaction ledgers">
+        <span class="nav-icon">📖</span>
+        <span class="nav-label">Account Ledger</span>
+      </button>
+      <button onclick="window.location.href='reports.html'" class="nav-btn" title="View financial reports and statements">
+        <span class="nav-icon">📈</span>
+        <span class="nav-label">Reports</span>
+      </button>
+      <button onclick="window.location.href='event-logs.html'" class="nav-btn active" title="View Event Logs">
+        <span class="nav-icon">📜</span>
+        <span class="nav-label">Event Logs</span>
+      </button>
+    </nav>
+
+    <main class="main-content">
+      <div class="page-header">
+        <h2>Event Logs - Audit Trail</h2>
+        <p class="subtitle">View all system changes with before/after images</p>
+      </div>
+
+    <div class="filters-section">
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label>Event Type</label>
+          <select id="eventTypeFilter">
+            <option value="">All Events</option>
+            <option value="account_added">Account Added</option>
+            <option value="account_modified">Account Modified</option>
+            <option value="account_activated">Account Activated</option>
+            <option value="account_deactivated">Account Deactivated</option>
+            <option value="user_approved">User Approved</option>
+            <option value="user_deleted">User Deleted</option>
+            <option value="user_activated">User Activated</option>
+            <option value="user_deactivated">User Deactivated</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>From Date</label>
+          <input type="date" id="fromDateFilter">
+        </div>
+
+        <div class="filter-group">
+          <label>To Date</label>
+          <input type="date" id="toDateFilter">
+        </div>
+
+        <div class="filter-group">
+          <label>Search User</label>
+          <input type="text" id="userSearchFilter" placeholder="Search by username...">
+        </div>
+      </div>
+
+      <div class="filter-actions">
+        <button onclick="loadEventLogs()" class="btn-primary">Apply Filters</button>
+        <button onclick="clearFilters()" class="btn-secondary">Clear Filters</button>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table id="eventLogsTable">
+        <thead>
+          <tr>
+            <th>Event ID</th>
+            <th>Date/Time</th>
+            <th>Event Type</th>
+            <th>Account/User</th>
+            <th>Changed By</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="6" style="text-align: center;">Loading event logs...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+      <!-- Event Statistics -->
+      <div id="accountStats" class="stats-grid"></div>
+    </main>
+  </div>
+
+  <!-- Event Details Modal -->
+  <div id="eventDetailsModal" class="modal">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h3>Event Details</h3>
+        <button onclick="closeModal('eventDetailsModal')" class="btn-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="eventDetailsContent"></div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeModal('eventDetailsModal')" class="btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/js/firebaseConfig.js"></script>
+  <script type="module" src="/js/ui.js"></script>
+  <script type="module" src="/js/event-logs.js"></script>
+  <script type="module" src="/js/help.js"></script>
+  <script type="module" src="/js/calendar-picker.js"></script>
+</body>
+</html>

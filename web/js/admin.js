@@ -363,7 +363,7 @@ window.rejectRequest = async function(requestId) {
 let allUsers = [];
 let filteredUsers = [];
 let currentPage = 1;
-const usersPerPage = 12;
+const usersPerPage = 4;
 
 // Load all users with enhanced card-based display
 async function loadUsers() {
