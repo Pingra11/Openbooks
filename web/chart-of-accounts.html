@@ -59,6 +59,9 @@
           <button onclick="showAddAccountModal()" class="btn-primary admin-only" title="Add New Account">
             ➕ Add Account
           </button>
+          <button onclick="showSendEmailModal()" class="btn-primary admin-only" title="Send Email to Users">
+            📧 Send Email
+          </button>
           <button onclick="loadChartOfAccounts()" class="btn-secondary" title="Refresh Accounts">
             🔄 Refresh
           </button>
@@ -276,6 +279,43 @@
         <div class="modal-actions">
           <button type="submit" class="btn-primary">Save Changes</button>
           <button type="button" onclick="closeModal('editAccountModal')" class="btn-secondary">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Send Email Modal -->
+  <div id="sendEmailModal" class="modal">
+    <div class="modal-content">
+      <h2>Send Email to Users</h2>
+      <form id="sendEmailForm" onsubmit="handleSendEmail(event)">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label>Select Recipients: <span class="required">*</span></label>
+            <input type="text" id="searchRecipients" placeholder="🔍 Search users by name, email, or role..." oninput="filterEmailRecipients()">
+            <div id="recipientsList" class="recipients-list">
+              <div class="loading-message">Loading users...</div>
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label>Subject: <span class="required">*</span></label>
+            <input type="text" id="emailSubject" required maxlength="200" placeholder="Enter email subject">
+          </div>
+
+          <div class="form-group full-width">
+            <label>Message: <span class="required">*</span></label>
+            <textarea id="emailMessage" required rows="8" placeholder="Enter your message here..."></textarea>
+          </div>
+
+          <div id="emailStatus" class="email-status"></div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="submit" class="btn-primary" id="sendEmailBtn">
+            📧 Send Email
+          </button>
+          <button type="button" onclick="closeModal('sendEmailModal')" class="btn-secondary">Cancel</button>
         </div>
       </form>
     </div>

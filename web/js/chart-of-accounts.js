@@ -8,7 +8,7 @@ import { auth, db } from "./firebaseConfig.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 import { 
   collection, getDocs, doc, getDoc, addDoc, updateDoc, setDoc,
-  query, where, orderBy, serverTimestamp, deleteDoc
+  query, where, orderBy, serverTimestamp, deleteDoc, runTransaction, deleteField
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 import { setChip } from "./ui.js";
 
@@ -76,6 +76,8 @@ function validateAccountNumber(number, category) {
 
 /**
  * Log event for audit trail
+ * CRITICAL: This function now throws errors to ensure audit trail integrity
+ * Callers must handle logging failures appropriately
  */
 async function logEvent(eventType, accountId, accountName, beforeData, afterData, userId, username) {
   try {
@@ -92,7 +94,10 @@ async function logEvent(eventType, accountId, accountName, beforeData, afterData
       dateTime: new Date().toISOString()
     });
   } catch (error) {
-    console.error('Error logging event:', error);
+    console.error('CRITICAL: Event logging failed - audit trail may be incomplete:', error);
+    // Re-throw the error so callers know logging failed
+    // This ensures audit trail failures are not silently ignored
+    throw new Error(`Failed to log event for audit trail: ${error.message}`);
   }
 }
 
@@ -206,6 +211,9 @@ function displayAccounts(accounts) {
           View
         </button>
         ${userRole === 'administrator' ? `
+          <button onclick="viewAccountEventLogs('${account.accountName}')" class="btn-action" title="View Event Logs for this Account">
+            View Logs
+          </button>
           <button onclick="editAccount('${account.id}')" class="btn-action" title="Edit Account">
             Edit
           </button>
@@ -413,17 +421,25 @@ window.saveNewAccount = async function(event) {
     const docRef = await addDoc(collection(db, "accounts"), newAccount);
     console.log('Account saved successfully with ID:', docRef.id);
     
-    // Log event
-    await logEvent(
-      'account_added',
-      docRef.id,
-      formData.accountName,
-      null,
-      newAccount,
-      currentUser.uid,
-      currentUser.username || currentUser.email
-    );
-    console.log('Event logged for account:', formData.accountName);
+    // CRITICAL: Log event - if this fails, rollback the account creation
+    try {
+      await logEvent(
+        'account_added',
+        docRef.id,
+        formData.accountName,
+        null,
+        newAccount,
+        currentUser.uid,
+        currentUser.username || currentUser.email
+      );
+      console.log('Event logged for account:', formData.accountName);
+    } catch (logError) {
+      // ROLLBACK: Delete the account since logging failed
+      console.error('Event logging failed - rolling back account creation');
+      await deleteDoc(doc(db, "accounts", docRef.id));
+      // Re-throw with clear message about rollback
+      throw new Error('Account creation rolled back due to audit logging failure: ' + logError.message);
+    }
     
     // Close modal with smooth transition
     closeModal('addAccountModal');
@@ -455,6 +471,13 @@ window.saveNewAccount = async function(event) {
  */
 window.viewAccountLedger = function(accountId) {
   window.location.href = `account-ledger.html?accountId=${accountId}`;
+};
+
+/**
+ * View event logs for specific account
+ */
+window.viewAccountEventLogs = function(accountName) {
+  window.location.href = `event-logs.html?accountName=${encodeURIComponent(accountName)}`;
 };
 
 /**
@@ -509,16 +532,26 @@ window.toggleAccountStatus = async function(accountId) {
     
     const afterImage = { ...accountData, active: newStatus };
     
-    // Log the event
-    await logEvent(
-      newStatus ? 'account_activated' : 'account_deactivated',
-      accountId,
-      accountData.accountName,
-      beforeImage,
-      afterImage,
-      currentUser.uid,
-      currentUser.username || currentUser.email
-    );
+    // CRITICAL: Log the event - if this fails, rollback the status change
+    try {
+      await logEvent(
+        newStatus ? 'account_activated' : 'account_deactivated',
+        accountId,
+        accountData.accountName,
+        beforeImage,
+        afterImage,
+        currentUser.uid,
+        currentUser.username || currentUser.email
+      );
+    } catch (logError) {
+      // ROLLBACK: Revert the status change since logging failed
+      console.error('Event logging failed - rolling back status change');
+      await updateDoc(accountRef, {
+        active: accountData.active
+      });
+      // Re-throw with clear message about rollback
+      throw new Error('Account status change rolled back due to audit logging failure: ' + logError.message);
+    }
     
     alert(`Account ${newStatus ? 'activated' : 'deactivated'} successfully`);
     loadChartOfAccounts();
@@ -656,16 +689,26 @@ window.saveEditedAccount = async function(event) {
     // Update account in Firestore
     await updateDoc(doc(db, "accounts", accountId), updatedData);
     
-    // Log the modification event
-    await logEvent(
-      'account_modified',
-      accountId,
-      accountName,
-      beforeData,
-      { ...beforeData, ...updatedData },
-      currentUser.uid,
-      currentUser.username || currentUser.email
-    );
+    // CRITICAL: Log the modification event - if this fails, rollback the update
+    try {
+      await logEvent(
+        'account_modified',
+        accountId,
+        accountName,
+        beforeData,
+        { ...beforeData, ...updatedData },
+        currentUser.uid,
+        currentUser.username || currentUser.email
+      );
+    } catch (logError) {
+      // ROLLBACK: Revert ALL account changes since logging failed
+      console.error('Event logging failed - rolling back account modification');
+      // CRITICAL: Use setDoc with merge:false to completely restore previous state
+      // This avoids updateDoc's rejection of undefined values and ensures exact rollback
+      await setDoc(doc(db, "accounts", accountId), beforeData, { merge: false });
+      // Re-throw with clear message about rollback
+      throw new Error('Account modification rolled back due to audit logging failure: ' + logError.message);
+    }
     
     alert('Account updated successfully!');
     closeModal('editAccountModal');
@@ -742,6 +785,270 @@ onAuthStateChanged(auth, async (user) => {
     window.location.href = "index.html";
   }
 });
+
+/**
+ * Show send email modal and load recipients
+ */
+window.showSendEmailModal = async function() {
+  if (userRole !== 'administrator') {
+    alert('Only administrators can send emails');
+    return;
+  }
+  
+  const modal = document.getElementById('sendEmailModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    setTimeout(() => modal.classList.add('show'), 10);
+    
+    // Reset form
+    document.getElementById('sendEmailForm').reset();
+    document.getElementById('emailStatus').className = 'email-status';
+    document.getElementById('emailStatus').textContent = '';
+    
+    // Clear search input
+    const searchInput = document.getElementById('searchRecipients');
+    if (searchInput) searchInput.value = '';
+    
+    // Load recipients
+    await loadEmailRecipients();
+  }
+};
+
+// Store all email recipients for filtering
+let allEmailRecipients = [];
+
+/**
+ * Load manager and accountant users as email recipients
+ */
+async function loadEmailRecipients() {
+  const recipientsList = document.getElementById('recipientsList');
+  if (!recipientsList) return;
+  
+  try {
+    recipientsList.innerHTML = '<div class="loading-message">Loading users...</div>';
+    
+    // Query Firestore for manager and accountant users (active and not suspended)
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('role', 'in', ['manager', 'accountant']), where('active', '==', true));
+    const snapshot = await getDocs(q);
+    
+    console.log(`Found ${snapshot.size} manager/accountant users in Firestore`);
+    
+    // Filter out suspended users (Firestore doesn't allow multiple inequality filters)
+    const activeUsers = [];
+    snapshot.forEach(doc => {
+      const user = doc.data();
+      if (!user.suspended) {
+        activeUsers.push(user);
+      }
+    });
+    
+    console.log(`After filtering suspended users: ${activeUsers.length} available recipients`);
+    
+    if (activeUsers.length === 0) {
+      recipientsList.innerHTML = '<div class="no-users-message">No manager or accountant users found</div>';
+      allEmailRecipients = [];
+      return;
+    }
+    
+    // Sort users: Managers first, then Accountants
+    activeUsers.sort((a, b) => {
+      // Manager (1) comes before Accountant (2)
+      const roleOrder = { 'manager': 1, 'accountant': 2 };
+      const roleComparison = (roleOrder[a.role] || 3) - (roleOrder[b.role] || 3);
+      
+      if (roleComparison !== 0) return roleComparison;
+      
+      // Within same role, sort alphabetically by name
+      const nameA = `${a.firstName || ''} ${a.lastName || ''}`.trim() || a.username || '';
+      const nameB = `${b.firstName || ''} ${b.lastName || ''}`.trim() || b.username || '';
+      return nameA.localeCompare(nameB);
+    });
+    
+    // Store all recipients for filtering
+    allEmailRecipients = activeUsers;
+    
+    // Display all recipients
+    displayEmailRecipients(activeUsers);
+    
+    console.log(`Loaded ${activeUsers.length} recipients (sorted: managers first, then accountants)`);
+    
+  } catch (error) {
+    console.error('Error loading recipients:', error);
+    recipientsList.innerHTML = '<div class="error-message">Error loading users. Please try again.</div>';
+    allEmailRecipients = [];
+  }
+}
+
+/**
+ * Display email recipients in the list
+ */
+function displayEmailRecipients(users) {
+  const recipientsList = document.getElementById('recipientsList');
+  if (!recipientsList) return;
+  
+  recipientsList.innerHTML = '';
+  
+  if (users.length === 0) {
+    recipientsList.innerHTML = '<div class="no-users-message">No users match your search</div>';
+    return;
+  }
+  
+  users.forEach(user => {
+    const checkbox = document.createElement('label');
+    checkbox.className = 'recipient-checkbox';
+    
+    const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username || 'Unknown';
+    const roleLabel = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+    
+    checkbox.innerHTML = `
+      <input type="checkbox" name="recipients" value="${user.email}" data-name="${fullName}">
+      <div class="recipient-info">
+        <span class="recipient-name">${fullName}</span>
+        <span class="recipient-email">${user.email}</span>
+      </div>
+      <span class="recipient-role">${roleLabel}</span>
+    `;
+    
+    recipientsList.appendChild(checkbox);
+  });
+}
+
+/**
+ * Filter email recipients based on search query
+ */
+window.filterEmailRecipients = function() {
+  const searchInput = document.getElementById('searchRecipients');
+  if (!searchInput) return;
+  
+  const searchTerm = searchInput.value.toLowerCase().trim();
+  
+  // If no search term, show all recipients
+  if (!searchTerm) {
+    displayEmailRecipients(allEmailRecipients);
+    return;
+  }
+  
+  // Filter recipients based on search term
+  const filteredUsers = allEmailRecipients.filter(user => {
+    const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim().toLowerCase();
+    const email = user.email.toLowerCase();
+    const role = user.role.toLowerCase();
+    const username = (user.username || '').toLowerCase();
+    
+    return fullName.includes(searchTerm) || 
+           email.includes(searchTerm) || 
+           role.includes(searchTerm) ||
+           username.includes(searchTerm);
+  });
+  
+  // Display filtered results
+  displayEmailRecipients(filteredUsers);
+  
+  console.log(`Search: "${searchTerm}" - Found ${filteredUsers.length} of ${allEmailRecipients.length} recipients`);
+};
+
+/**
+ * Handle send email form submission
+ */
+window.handleSendEmail = async function(event) {
+  event.preventDefault();
+  
+  if (userRole !== 'administrator') {
+    alert('Only administrators can send emails');
+    return;
+  }
+  
+  try {
+    // Get selected recipients
+    const checkboxes = document.querySelectorAll('input[name="recipients"]:checked');
+    if (checkboxes.length === 0) {
+      showEmailStatus('Please select at least one recipient', 'error');
+      return;
+    }
+    
+    const recipients = Array.from(checkboxes).map(cb => cb.value);
+    const subject = document.getElementById('emailSubject').value.trim();
+    const message = document.getElementById('emailMessage').value.trim();
+    
+    if (!subject || !message) {
+      showEmailStatus('Please fill in all required fields', 'error');
+      return;
+    }
+    
+    // Disable send button
+    const sendBtn = document.getElementById('sendEmailBtn');
+    sendBtn.disabled = true;
+    
+    // Show loading status
+    showEmailStatus('Sending email...', 'loading');
+    
+    // Get Firebase ID token for authentication
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error('You must be logged in to send emails');
+    }
+    
+    const idToken = await user.getIdToken();
+    
+    // Send email via Firebase Admin server
+    // Use the current host for Firebase Admin server in production
+    const firebaseAdminUrl = window.location.hostname === 'localhost' 
+      ? 'http://localhost:3001'
+      : `${window.location.protocol}//${window.location.hostname}:3001`;
+    
+    const response = await fetch(`${firebaseAdminUrl}/send-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`
+      },
+      body: JSON.stringify({
+        to: recipients,
+        subject: subject,
+        text: message,
+        html: `<p>${message.replace(/\n/g, '<br>')}</p>`
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (!response.ok || !result.success) {
+      throw new Error(result.error || 'Failed to send email');
+    }
+    
+    // Show success
+    const acceptedCount = result.accepted?.length || recipients.length;
+    showEmailStatus(`Email sent successfully to ${acceptedCount} recipient(s)!`, 'success');
+    
+    // Reset form after 2 seconds
+    setTimeout(() => {
+      closeModal('sendEmailModal');
+    }, 2000);
+    
+    console.log('Email sent successfully:', result);
+    
+  } catch (error) {
+    console.error('Error sending email:', error);
+    showEmailStatus(`Error: ${error.message}`, 'error');
+    
+  } finally {
+    // Re-enable send button
+    const sendBtn = document.getElementById('sendEmailBtn');
+    if (sendBtn) sendBtn.disabled = false;
+  }
+};
+
+/**
+ * Show email status message
+ */
+function showEmailStatus(message, type) {
+  const statusEl = document.getElementById('emailStatus');
+  if (statusEl) {
+    statusEl.textContent = message;
+    statusEl.className = `email-status show ${type}`;
+  }
+}
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {

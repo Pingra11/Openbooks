@@ -64,8 +64,9 @@ window.loadEventLogs = async function() {
     const fromDateFilter = document.getElementById('fromDateFilter').value;
     const toDateFilter = document.getElementById('toDateFilter').value;
     const userSearchFilter = document.getElementById('userSearchFilter').value.toLowerCase();
+    const accountSearchFilter = document.getElementById('accountSearchFilter').value.toLowerCase();
 
-    console.log('loadEventLogs: Filters:', { eventTypeFilter, fromDateFilter, toDateFilter, userSearchFilter });
+    console.log('loadEventLogs: Filters:', { eventTypeFilter, fromDateFilter, toDateFilter, userSearchFilter, accountSearchFilter });
 
     // Query event logs
     let eventQuery = query(
@@ -111,6 +112,15 @@ window.loadEventLogs = async function() {
       filteredLogs = filteredLogs.filter(log => 
         log.username?.toLowerCase().includes(userSearchFilter) ||
         log.userId?.toLowerCase().includes(userSearchFilter)
+      );
+    }
+
+    if (accountSearchFilter) {
+      filteredLogs = filteredLogs.filter(log => 
+        log.accountName?.toLowerCase().includes(accountSearchFilter) ||
+        log.accountId?.toLowerCase().includes(accountSearchFilter) ||
+        log.beforeImage?.accountNumber?.toString().includes(accountSearchFilter) ||
+        log.afterImage?.accountNumber?.toString().includes(accountSearchFilter)
       );
     }
 
@@ -297,6 +307,7 @@ window.clearFilters = function() {
   document.getElementById('fromDateFilter').value = '';
   document.getElementById('toDateFilter').value = '';
   document.getElementById('userSearchFilter').value = '';
+  document.getElementById('accountSearchFilter').value = '';
   loadEventLogs();
 };
 
@@ -371,6 +382,19 @@ onAuthStateChanged(auth, async (user) => {
         alert('Access denied. Only administrators can view event logs.');
         window.location.href = 'admin.html';
         return;
+      }
+      
+      // Check for URL parameters to pre-populate filters
+      const urlParams = new URLSearchParams(window.location.search);
+      const accountNameParam = urlParams.get('accountName');
+      const accountIdParam = urlParams.get('accountId');
+      
+      if (accountNameParam) {
+        document.getElementById('accountSearchFilter').value = accountNameParam;
+        console.log('Pre-populated account filter with:', accountNameParam);
+      } else if (accountIdParam) {
+        document.getElementById('accountSearchFilter').value = accountIdParam;
+        console.log('Pre-populated account filter with:', accountIdParam);
       }
       
       // Load event logs
