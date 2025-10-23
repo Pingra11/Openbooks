@@ -1,5 +1,15 @@
 # Sprint 3
 
+General Requirements
+---
+
+- Error messages
+	- Displayed in red
+	- Dissapear once resolved automatically
+
+- Notifications
+	- Manager receives a notification when a journal entry is submitted for approval
+
 Chart of Accounts
 ---
 
@@ -72,15 +82,6 @@ Roles
 - Admin
 - Manager
 - Accountant
-
-## General Requirements
-
-- Error messages
-	- Displayed in red
-	- Dissapear once resolved automatically
-
-- Notifications
-	- Manager receives a notification when a journal entry is submitted for approval
 
 ## Journal View
 
