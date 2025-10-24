@@ -1,0 +1,117 @@
+.jem-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(0, 0, 0, 0.5);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.25s ease;
+	z-index: 999999;
+}
+
+.jem-overlay.active {
+	opacity: 1;
+	pointer-events: all;
+}
+
+.jem-container {
+	display: flex;
+	flex-direction: column;
+	margin: 8px;
+	width: 80%;
+	height: 80%;
+	background: #334155;
+	border-radius: 10px;
+	max-width: 90vw;
+	padding: 1.5rem;
+	box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+	color: #000;
+	z-index: 10000;
+	pointer-events: auto;
+}
+
+.jem-tchart {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	margin: 8px;
+}
+
+.jem-containerRow {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	margin: 8px;
+}
+
+.jem-vr {
+	height: 100px;
+	width: 1px;
+	background-color: black;
+	margin-left: 8px;
+	margin-right: 8px;
+}
+
+.jem-header {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	margin: 8px;
+}
+
+.jem-buttonClose {
+	aspect-ratio: 1/1;
+	width: 32px;
+	margin: 8px;
+}
+
+.jem-debits {
+	height: 100%;
+	width: 50%;
+}
+
+.jem-credits {
+	height: 100%;
+	width: 50%;
+}
+
+.jem-field {
+	display: flex;
+	justify-content: space-between;
+}
+
+.jem-label {
+	font-family: Inter, sans-serif;
+	font-weight: 500;
+	margin-left: 8px;
+	margin-right: 8px;
+}
+
+.jem-accountSelect {
+	flex: 1
+}
+
+.jem-hr {
+	width: 100%;
+}
+
+.jem-button {
+	margin: 8px;
+	height: 36px;
+	width: 128px;
+}
+
+.jem-buttonClear {
+	margin: 8px;
+	height: 36px;
+	width: 128px;
+
+}
