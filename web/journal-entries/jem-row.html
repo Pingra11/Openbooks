@@ -1,11 +1,22 @@
 <tr>
 	<td>
-		<select class=jem-field>
+		<select class='jem-destAccountField'>
 		</select>
 	</td>
 	<td>
-	<input placeholder='$0.00'/>
+		<input class='jem-destDebitField'
+			   type='number'
+			   min='0.00'
+			   step='0.01'
+			   inputmode="decimal"
+			   placeholder='0.00'/>
+	</td>
 	<td>
-		<input placeholder='$0.00'/>
+		<input class='jem-destCreditField'
+			   type="number"
+			   min='0.00'
+			   step='0.01'
+			   inputmode="decimal"
+			   placeholder='0.00'/>
 	</td>
 </tr>

@@ -5,33 +5,61 @@
 			<button class='jem-buttonClose' id='jem-close' onclick=''>X</button>
 		</h1>
 		<div class='jem-tchart'>
-			<div class='jem-debits'>
-				<div class='jem-field'>
-					<label class='jem-label' for='jem-debitSelect'>Debit Account</label>
-					<select id='jem-debitSelect' class='jem-accountSelect'></select>
-				</div>
-				<hr class='jem-hr'>
-				<div id="jem-debitList" class="jem-list"></div>
-			</div>
-			<div class='jem-vr'></div>
-			<div class='jem-credits'>
-				<div class='jem-field'>
-					<label class='jem-label' for='jem-creditSelect'>Credit Account</label>
-					<select id='jem-creditSelect' class='jem-accountSelect'></select>
-				</div>
-				<hr>
-				<div id="jem-creditList" class="jem-list"></div>
-			</div>
+			<div class='jem-sourceColumn'>
+				<h2 class='jem-subtitle'>Source Account</h2>
+				<table class='jem-table'>
+					<tr>
+						<th>Account</th>
+						<th>Debit</th>
+						<th>Credit</th>
+					</tr>
+					<tr>
+						<td>
+							<select id='jem-sourceSelect' class=jem-field>
 
+							</select>
+						</td>
+						<td>
+							<input id='jem-sourceDebit' placeholder='$0.00'/>
+						</td>
+						<td>
+							<input id='jem-sourceCredit' placeholder='$0.00'/>
+						</td>
+					</tr>
+				</table>
+
+			</div>
+			<div class='jem-destColumn'>
+				<h2 class='jem-subtitle'>Destination Accounts</h2>
+				<div style='max-height: 500px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;'>
+					<table id='jem-destTable' class='jem-table'>
+						<thead>
+							<tr>
+								<th>Account</th>
+								<th>Debit</th>
+								<th>Credit</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+			</div>
+			<div class='jem-metaColumn'>
+				<h2 class='jem-subtitle'>Information</h2>
+				<textarea id='jem-reference' placeholder='Reference' class='jem-reference'></textarea>
+				<textarea id='jem-description' placeholder='Description' class='jem-description'></textarea>
+				<div id="jem-fileDrop" class="jem-fileDrop">
+					<p>Drag files here or click to upload</p>
+					<input type="file" id="jem-fileInput" accept='.pdf, .doc, .docx, .xls, .xlxs .csv, .jpg, .png' multiple>
+					<ul id="fileList" class="file-list"></ul>
+				</div>
+			</div>
 		</div>
-		<hr class='jem-hr'>
+		<p id='jem-errorMessage'></p>
+		<hr class='jem-hr'/>
 		<div class='jem-containerRow'>
-			<button class=jem-button id='jem-submit' onclick=''>
-				Submit
-			</button>
-			<button class='jem-buttonClear' id='jem-clear' onclick=''>
-				Clear
-			</button>
+			<button class=jem-button id='jem-submit' onclick=''>Submit</button>
+			<button class='jem-buttonClear' id='jem-clear' onclick=''>Clear</button>
 		</div>
 	</div>
 

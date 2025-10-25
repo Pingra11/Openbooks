@@ -26,8 +26,8 @@
 	display: flex;
 	flex-direction: column;
 	margin: 8px;
-	width: 80%;
-	height: 80%;
+	width: auto;
+	height: auto;
 	background: #334155;
 	border-radius: 10px;
 	max-width: 90vw;
@@ -41,8 +41,20 @@
 .jem-tchart {
 	display: flex;
 	flex-direction: row;
-	justify-content: space-around;
+	align-items: flex-start;
+	justify-content: center;
+	width: 100%;
+}
+
+.jem-sourceColumn, .jem-destColumn, .jem-metaColumn {
+	justify-content: center;
+	align-content: flex-start;
+	width: 33vw;
 	margin: 8px;
+}
+
+.jem-table {
+	border-radius: 15px;
 }
 
 .jem-containerRow {
@@ -54,8 +66,8 @@
 
 .jem-vr {
 	height: 100px;
-	width: 1px;
-	background-color: black;
+	width: 4px;
+	border: white;
 	margin-left: 8px;
 	margin-right: 8px;
 }
@@ -67,23 +79,23 @@
 	margin: 8px;
 }
 
+.jem-table-container::-webkit-scrollbar {
+	display: none;
+}
+
 .jem-buttonClose {
 	aspect-ratio: 1/1;
 	width: 32px;
 	margin: 8px;
 }
 
-.jem-debits {
-	height: 100%;
-	width: 50%;
+.jem-tableHeader {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
 }
 
-.jem-credits {
-	height: 100%;
-	width: 50%;
-}
-
-.jem-field {
+.jem-field, .jem-destAccountField {
 	display: flex;
 	justify-content: space-between;
 }
@@ -101,6 +113,21 @@
 
 .jem-hr {
 	width: 100%;
+	margin: 2px;
+}
+
+.jem-description {
+	height: 300px;
+	width: 98%;
+	text-align: left;
+	margin: 8px;
+	resize: vertical;
+}
+
+.jem-fileDrop {
+	height: 150px;
+	width: 98%;
+	margin: 8px;
 }
 
 .jem-button {
@@ -114,4 +141,12 @@
 	height: 36px;
 	width: 128px;
 
+}
+
+.jem-errorMessage {
+	display: none;
+	justify-content: center;
+	color: red;
+	font-weight: 500;
+	font-size: 16px;
 }
