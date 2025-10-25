@@ -25,6 +25,28 @@ export const JournalEntryModal = {
 		this.overlay = document.querySelector('.jem-overlay');
 		this.container = this.overlay.querySelector('.jem-container');
 
+		this.container.querySelector('#jem-close')
+			.addEventListener('click', () => this.close());
+		this.container.querySelector('#jem-submit')
+			.addEventListener('click', async () => {
+				try {
+					const result = await this.handleSubmit();
+					if (result?.ok) {
+						this.handleClear();
+						alert('Entry submitted successfully.');
+					}
+				} catch (err) {
+					console.error('Submission failed:', err);
+					alert('Failed to submit entry.');
+				}
+			});
+		this.container.querySelector('#jem-clear')
+			.addEventListener('click', () => this.handleClear());
+
+
+		this.overlay = document.querySelector('.jem-overlay');
+		this.container = this.overlay.querySelector('.jem-container');
+
 		console.log('Overlay found?', this.overlay);
 
 		if (!this.overlay) {
@@ -36,13 +58,6 @@ export const JournalEntryModal = {
 		}
 
 		this.container.style.display = 'none';
-
-		this.container.querySelector('#jem-close')
-			.addEventListener('click', () => this.close());
-		this.container.querySelector('#jem-submit')
-			.addEventListener('click', () => this.handleSubmit());
-		this.container.querySelector('#jem-clear')
-			.addEventListener('click', () => this.handleClear());
 
 		const authInstance = getAuth();
 		onAuthStateChanged(authInstance, (user) => {
@@ -85,6 +100,7 @@ export const JournalEntryModal = {
 		}));
 
 		selectorArray.forEach(selector => {
+			selector.innerHTML = '';
 			const nullOption = document.createElement('option')
 
 			nullOption.value = '';
@@ -245,51 +261,53 @@ export const JournalEntryModal = {
 				try {
 					await addDoc(collection(db, "journalEntries"), tx);
 
+
 				} catch (e) {
 					throw new Error('Failed to submit entry.')
 				}
 			}
 		}
+
+		const event = {
+			eventType: 'journal_entry',
+			description: '',
+			userId: createdBy,
+			username: this.currentUser.uid,
+			timestamp: entryDate,
+			details: {
+				entryNumber,
+				status: 'pending',
+				totalAmount: sourceDebit > 0 ? sourceDebit : sourceCredit
+			}
+		}
+		await addDoc(collection(db, 'eventLogs'), event);
+
 		return {ok: true};
 	},
 
 	handleClear() {
-		//get all selectors (jem-field)
-		//get all inputs    (input)
-		//get description   (jem-description)
-		//get filedrop      (jem-filedrop)
-		//set all values to empty
-
 		const modal = document.querySelector('.jem-container');
-		const selectors = modal.getElementsByClassName('jem-field');
+		const selectors = modal.querySelectorAll('.jem-field, .jem-destAccountField');
 		const inputs = modal.getElementsByTagName('input');
 		const description = modal.querySelector('#jem-description');
 		const fileDrop = modal.querySelector('#jem-fileDrop');
 
-		for (let selector of selectors) {
-			selector.value = null;
-		}
-
-		for (let input of inputs) {
-			input.value = '';
-		}
+		for (let selector of selectors) selector.value = '';
+		for (let input of inputs) input.value = '';
 
 		description.value = '';
-		fileDrop.value = 'Click or drag to add files.'
-
-
+		fileDrop.value = 'Click or drag to add files.';
 	},
-
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-	JournalEntryModal.load();
+document.addEventListener('DOMContentLoaded', async () => {
+	await JournalEntryModal.load();
+	await JournalEntryModal.serialize()
 
 	const openBtn = document.getElementById('openJEM');
 	if (openBtn) {
 		openBtn.addEventListener('click', () => {
 			JournalEntryModal.open();
-			JournalEntryModal.serialize()
 		});
 	}
 
@@ -301,13 +319,16 @@ document.addEventListener('DOMContentLoaded', () => {
 	const submitBtn = document.getElementById('jem-submit')
 	if (submitBtn) {
 		submitBtn.addEventListener('click', async () => {
-			const res = await JournalEntryModal.handleSubmit();
-			if (res.ok) {
-				JournalEntryModal.handleClear();
-			} else {
-				alert('failed to submit entry.')
+			try {
+				const result = await JournalEntryModal.handleSubmit();
+				if (result?.ok) {
+					JournalEntryModal.handleClear();
+					alert('Entry submitted successfully.');
+				}
+			} catch (err) {
+				console.error('Submission failed:', err);
+				alert('Failed to submit entry.');
 			}
-
 		});
 	}
 

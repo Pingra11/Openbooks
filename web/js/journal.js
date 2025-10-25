@@ -3,13 +3,13 @@
  * Create, view, edit, and post journal entries
  */
 
-import { auth, db } from "./firebaseConfig.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-import { 
+import {auth, db} from "./firebaseConfig.js";
+import {onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+import {
   collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc,
   query, where, orderBy, Timestamp, writeBatch
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
-import { setChip } from "./ui.js";
+import {setChip} from "./ui.js";
 
 let currentUser = null;
 let allAccounts = [];
@@ -38,7 +38,7 @@ function formatDate(timestamp) {
   } else {
     date = new Date(timestamp);
   }
-  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  return date.toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'});
 }
 
 /**
@@ -49,12 +49,12 @@ async function loadAccounts() {
     const accountsSnapshot = await getDocs(
       query(collection(db, "accounts"), orderBy("accountNumber"))
     );
-    
+
     allAccounts = [];
     accountsSnapshot.forEach(doc => {
       const account = doc.data();
       if (account.active !== false) {
-        allAccounts.push({ id: doc.id, ...account });
+        allAccounts.push({id: doc.id, ...account});
       }
     });
   } catch (error) {
@@ -70,19 +70,19 @@ async function loadJournalEntries(filters = {}) {
     const entriesSnapshot = await getDocs(
       query(collection(db, "journalEntries"), orderBy("entryDate", "desc"))
     );
-    
+
     let entries = [];
     entriesSnapshot.forEach(doc => {
-      entries.push({ id: doc.id, ...doc.data() });
+      entries.push({id: doc.id, ...doc.data()});
     });
-    
+
     // Apply filters
     if (filters.status) {
       entries = entries.filter(e => e.status === filters.status);
     }
     if (filters.searchTerm) {
       const term = filters.searchTerm.toLowerCase();
-      entries = entries.filter(e => 
+      entries = entries.filter(e =>
         e.entryNumber?.toString().includes(term) ||
         e.description?.toLowerCase().includes(term) ||
         e.reference?.toLowerCase().includes(term)
@@ -103,9 +103,9 @@ async function loadJournalEntries(filters = {}) {
         return entryDate <= toDate;
       });
     }
-    
+
     displayEntries(entries);
-    
+
   } catch (error) {
     console.error('Error loading journal entries:', error);
     alert('Error loading journal entries: ' + error.message);
@@ -117,17 +117,17 @@ async function loadJournalEntries(filters = {}) {
  */
 function displayEntries(entries) {
   const tbody = document.querySelector('#journalTable tbody');
-  
+
   if (entries.length === 0) {
     tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No journal entries found</td></tr>';
     return;
   }
-  
+
   tbody.innerHTML = entries.map(entry => {
-    const statusBadge = entry.status === 'posted' 
+    const statusBadge = entry.status === 'posted'
       ? '<span class="badge badge-success">Posted</span>'
       : '<span class="badge badge-warning">Draft</span>';
-    
+
     const actions = entry.status === 'draft'
       ? `
         <button onclick="editEntry('${entry.id}')" class="btn-action" title="Edit Entry">Edit</button>
@@ -138,7 +138,7 @@ function displayEntries(entries) {
         <button onclick="viewEntry('${entry.id}')" class="btn-action" title="View Details">View</button>
         <button onclick="reverseEntry('${entry.id}')" class="btn-action" title="Reverse Entry">Reverse</button>
       `;
-    
+
     return `
       <tr>
         <td>${entry.entryNumber || '-'}</td>
@@ -156,32 +156,32 @@ function displayEntries(entries) {
 /**
  * Show new entry modal
  */
-window.showNewEntryModal = async function() {
+window.showNewEntryModal = async function () {
   console.log('New Entry button clicked');
-  
+
   const modal = document.getElementById('journalEntryModal');
   if (!modal) {
     alert('Error: Journal entry modal not found. Please refresh the page.');
     console.error('Modal element "journalEntryModal" not found');
     return;
   }
-  
+
   document.getElementById('modalTitle').textContent = 'New Journal Entry';
   document.getElementById('journalEntryForm').reset();
   document.getElementById('entryId').value = '';
-  
+
   // Set today's date
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('entryDate').value = today;
-  
+
   // Clear line items
   document.getElementById('lineItemsContainer').innerHTML = '';
   lineItemCounter = 0;
-  
+
   // Add two initial line items
   addLineItem();
   addLineItem();
-  
+
   modal.style.display = 'flex';
   setTimeout(() => modal.classList.add('show'), 10);
   console.log('Journal entry modal opened successfully');
@@ -190,7 +190,7 @@ window.showNewEntryModal = async function() {
 /**
  * Close journal modal
  */
-window.closeJournalModal = function() {
+window.closeJournalModal = function () {
   const modal = document.getElementById('journalEntryModal');
   if (modal) {
     modal.classList.remove('show');
@@ -201,7 +201,7 @@ window.closeJournalModal = function() {
 /**
  * Close view modal
  */
-window.closeViewModal = function() {
+window.closeViewModal = function () {
   const modal = document.getElementById('viewEntryModal');
   if (modal) {
     modal.classList.remove('show');
@@ -212,22 +212,22 @@ window.closeViewModal = function() {
 /**
  * Add line item row
  */
-window.addLineItem = function() {
+window.addLineItem = function () {
   lineItemCounter++;
   const container = document.getElementById('lineItemsContainer');
-  
+
   const lineItemDiv = document.createElement('div');
   lineItemDiv.className = 'line-item';
   lineItemDiv.id = `lineItem${lineItemCounter}`;
-  
+
   lineItemDiv.innerHTML = `
     <div class="line-item-grid">
       <div class="form-group">
         <select class="account-select" data-line="${lineItemCounter}" onchange="updateTotals()">
           <option value="">Select Account...</option>
-          ${allAccounts.map(acc => 
-            `<option value="${acc.id}">${acc.accountNumber} - ${acc.accountName}</option>`
-          ).join('')}
+          ${allAccounts.map(acc =>
+    `<option value="${acc.id}">${acc.accountNumber} - ${acc.accountName}</option>`
+  ).join('')}
         </select>
       </div>
       <div class="form-group">
@@ -251,7 +251,7 @@ window.addLineItem = function() {
       </button>
     </div>
   `;
-  
+
   container.appendChild(lineItemDiv);
   updateTotals();
 };
@@ -259,7 +259,7 @@ window.addLineItem = function() {
 /**
  * Remove line item
  */
-window.removeLineItem = function(lineNumber) {
+window.removeLineItem = function (lineNumber) {
   const lineItem = document.getElementById(`lineItem${lineNumber}`);
   if (lineItem) {
     lineItem.remove();
@@ -270,45 +270,45 @@ window.removeLineItem = function(lineNumber) {
 /**
  * Handle debit/credit input (clear opposite field)
  */
-window.handleDebitCredit = function(lineNumber, type) {
+window.handleDebitCredit = function (lineNumber, type) {
   const debitInput = document.querySelector(`.debit-input[data-line="${lineNumber}"]`);
   const creditInput = document.querySelector(`.credit-input[data-line="${lineNumber}"]`);
-  
+
   if (type === 'debit' && debitInput.value) {
     creditInput.value = '';
   } else if (type === 'credit' && creditInput.value) {
     debitInput.value = '';
   }
-  
+
   updateTotals();
 };
 
 /**
  * Update totals
  */
-window.updateTotals = function() {
+window.updateTotals = function () {
   const debitInputs = document.querySelectorAll('.debit-input');
   const creditInputs = document.querySelectorAll('.credit-input');
-  
+
   let totalDebits = 0;
   let totalCredits = 0;
-  
+
   debitInputs.forEach(input => {
     const val = parseFloat(input.value) || 0;
     totalDebits += val;
   });
-  
+
   creditInputs.forEach(input => {
     const val = parseFloat(input.value) || 0;
     totalCredits += val;
   });
-  
+
   const difference = Math.abs(totalDebits - totalCredits);
-  
+
   document.getElementById('totalDebits').textContent = formatCurrency(totalDebits);
   document.getElementById('totalCredits').textContent = formatCurrency(totalCredits);
   document.getElementById('totalDifference').textContent = formatCurrency(difference);
-  
+
   // Color the difference
   const diffElement = document.getElementById('totalDifference');
   if (difference === 0 && totalDebits > 0) {
@@ -321,28 +321,28 @@ window.updateTotals = function() {
 /**
  * Save journal entry
  */
-window.saveJournalEntry = async function(status) {
+window.saveJournalEntry = async function (status) {
   try {
     const entryDate = document.getElementById('entryDate').value;
     const reference = document.getElementById('entryReference').value;
     const description = document.getElementById('entryDescription').value;
-    
+
     if (!entryDate || !description) {
       alert('Please fill in all required fields');
       return;
     }
-    
+
     // Collect line items
     const lineItems = [];
     const accountSelects = document.querySelectorAll('.account-select');
-    
+
     accountSelects.forEach(select => {
       const lineNumber = select.dataset.line;
       const accountId = select.value;
       const debit = parseFloat(document.querySelector(`.debit-input[data-line="${lineNumber}"]`).value) || 0;
       const credit = parseFloat(document.querySelector(`.credit-input[data-line="${lineNumber}"]`).value) || 0;
       const lineDesc = document.querySelector(`.description-input[data-line="${lineNumber}"]`).value;
-      
+
       if (accountId && (debit > 0 || credit > 0)) {
         const account = allAccounts.find(a => a.id === accountId);
         lineItems.push({
@@ -355,25 +355,25 @@ window.saveJournalEntry = async function(status) {
         });
       }
     });
-    
+
     if (lineItems.length < 2) {
       alert('A journal entry must have at least 2 line items');
       return;
     }
-    
+
     // Validate debits = credits
     const totalDebits = lineItems.reduce((sum, item) => sum + item.debit, 0);
     const totalCredits = lineItems.reduce((sum, item) => sum + item.credit, 0);
-    
+
     if (Math.abs(totalDebits - totalCredits) > 0.01) {
       alert('Total debits must equal total credits');
       return;
     }
-    
+
     // Generate entry number
     const entriesSnapshot = await getDocs(collection(db, "journalEntries"));
     const entryNumber = entriesSnapshot.size + 1;
-    
+
     const entryData = {
       entryNumber,
       entryDate: Timestamp.fromDate(new Date(entryDate)),
@@ -387,28 +387,28 @@ window.saveJournalEntry = async function(status) {
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now()
     };
-    
+
     if (status === 'posted') {
       entryData.postedBy = currentUser.uid;
       entryData.postedByName = entryData.createdByName;
       entryData.postedAt = Timestamp.now();
     }
-    
+
     const entryId = document.getElementById('entryId').value;
-    
+
     if (entryId) {
       // Update existing
       await updateDoc(doc(db, "journalEntries", entryId), entryData);
     } else {
       // Create new
       const docRef = await addDoc(collection(db, "journalEntries"), entryData);
-      
+
       // If posting, update account balances
       if (status === 'posted') {
         await postJournalEntry(docRef.id, lineItems);
       }
     }
-    
+
     // Log event
     await addDoc(collection(db, "eventLogs"), {
       eventType: 'journal_entry',
@@ -416,14 +416,14 @@ window.saveJournalEntry = async function(status) {
       userId: currentUser.uid,
       username: currentUser.username,
       timestamp: Timestamp.now(),
-      details: { entryNumber, status, totalAmount: totalDebits }
+      details: {entryNumber, status, totalAmount: totalDebits}
     });
-    
+
     closeJournalModal();
     loadJournalEntries();
-    
+
     alert(`Journal entry ${status === 'posted' ? 'posted' : 'saved'} successfully!`);
-    
+
   } catch (error) {
     console.error('Error saving journal entry:', error);
     alert('Error saving journal entry: ' + error.message);
@@ -435,16 +435,16 @@ window.saveJournalEntry = async function(status) {
  */
 async function postJournalEntry(entryId, lineItems) {
   const batch = writeBatch(db);
-  
+
   for (const item of lineItems) {
     const accountRef = doc(db, "accounts", item.accountId);
     const accountDoc = await getDoc(accountRef);
     const account = accountDoc.data();
-    
+
     // Update account totals
     const newDebit = parseFloat(account.debit || 0) + item.debit;
     const newCredit = parseFloat(account.credit || 0) + item.credit;
-    
+
     // Calculate new balance based on normal side
     let newBalance;
     if (account.normalSide === 'Debit') {
@@ -452,13 +452,13 @@ async function postJournalEntry(entryId, lineItems) {
     } else {
       newBalance = newCredit - newDebit;
     }
-    
+
     batch.update(accountRef, {
       debit: newDebit,
       credit: newCredit,
       balance: newBalance
     });
-    
+
     // Create ledger transaction
     const ledgerRef = doc(collection(db, "ledgerTransactions"));
     batch.set(ledgerRef, {
@@ -474,22 +474,22 @@ async function postJournalEntry(entryId, lineItems) {
       createdAt: Timestamp.now()
     });
   }
-  
+
   await batch.commit();
 }
 
 /**
  * View entry details
  */
-window.viewEntry = async function(entryId) {
+window.viewEntry = async function (entryId) {
   try {
     const entryDoc = await getDoc(doc(db, "journalEntries", entryId));
     const entry = entryDoc.data();
-    
-    const statusBadge = entry.status === 'posted' 
+
+    const statusBadge = entry.status === 'posted'
       ? '<span class="badge badge-success">Posted</span>'
       : '<span class="badge badge-warning">Draft</span>';
-    
+
     const content = `
       <div class="entry-view">
         <div class="entry-header-info">
@@ -538,12 +538,12 @@ window.viewEntry = async function(entryId) {
         </table>
       </div>
     `;
-    
+
     document.getElementById('viewEntryContent').innerHTML = content;
     const modal = document.getElementById('viewEntryModal');
     modal.style.display = 'flex';
     setTimeout(() => modal.classList.add('show'), 10);
-    
+
   } catch (error) {
     console.error('Error viewing entry:', error);
     alert('Error loading entry details');
@@ -553,11 +553,11 @@ window.viewEntry = async function(entryId) {
 /**
  * Delete draft entry
  */
-window.deleteEntry = async function(entryId) {
+window.deleteEntry = async function (entryId) {
   if (!confirm('Are you sure you want to delete this draft entry?')) {
     return;
   }
-  
+
   try {
     await deleteDoc(doc(db, "journalEntries", entryId));
     loadJournalEntries();
@@ -571,11 +571,11 @@ window.deleteEntry = async function(entryId) {
 /**
  * Reverse a posted entry
  */
-window.reverseEntry = async function(entryId) {
+window.reverseEntry = async function (entryId) {
   if (!confirm('This will create a reversing entry. Continue?')) {
     return;
   }
-  
+
   alert('Reversing entry functionality coming soon!');
   // TODO: Implement reversing entry logic
 };
@@ -583,7 +583,7 @@ window.reverseEntry = async function(entryId) {
 /**
  * Edit draft entry
  */
-window.editEntry = async function(entryId) {
+window.editEntry = async function (entryId) {
   alert('Edit functionality coming soon!');
   // TODO: Implement edit functionality
 };
@@ -591,21 +591,21 @@ window.editEntry = async function(entryId) {
 /**
  * Apply filters
  */
-window.applyFilters = function() {
+window.applyFilters = function () {
   const filters = {
     status: document.getElementById('filterStatus')?.value || '',
     searchTerm: document.getElementById('searchEntry')?.value || '',
     fromDate: document.getElementById('filterFromDate')?.value || null,
     toDate: document.getElementById('filterToDate')?.value || null
   };
-  
+
   loadJournalEntries(filters);
 };
 
 /**
  * Clear filters
  */
-window.clearFilters = function() {
+window.clearFilters = function () {
   document.getElementById('filterStatus').value = '';
   document.getElementById('searchEntry').value = '';
   document.getElementById('filterFromDate').value = '';
@@ -619,8 +619,8 @@ onAuthStateChanged(auth, async (user) => {
     const userDoc = await getDoc(doc(db, "users", user.uid));
     if (userDoc.exists()) {
       const userData = userDoc.data();
-      currentUser = { uid: user.uid, ...userData };
-      
+      currentUser = {uid: user.uid, ...userData};
+
       // Update user chip
       const userChip = document.getElementById('userChip');
       if (userChip) {
@@ -632,11 +632,11 @@ onAuthStateChanged(auth, async (user) => {
           username: userData.username
         });
       }
-      
+
       // Load data
       await loadAccounts();
       await loadJournalEntries();
-      
+
     } else {
       window.location.href = "index.html";
     }
