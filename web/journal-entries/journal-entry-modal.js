@@ -14,6 +14,7 @@ export const JournalEntryModal = {
 			document.head.appendChild(css);
 		}
 
+
 		const res = await fetch('./journal-entries/journal-entry-modal.html');
 		const html = await res.text();
 
@@ -26,7 +27,12 @@ export const JournalEntryModal = {
 		this.container = this.overlay.querySelector('.jem-container');
 
 		this.container.querySelector('#jem-close')
-			.addEventListener('click', () => this.close());
+			.addEventListener('click', () => {
+				this.handleClear();
+				this.close();
+			});
+
+
 		this.container.querySelector('#jem-submit')
 			.addEventListener('click', async () => {
 				try {
@@ -57,7 +63,6 @@ export const JournalEntryModal = {
 			console.warn('JEM container not found!');
 		}
 
-		this.container.style.display = 'none';
 
 		const authInstance = getAuth();
 		onAuthStateChanged(authInstance, (user) => {
@@ -121,17 +126,15 @@ export const JournalEntryModal = {
 	},
 
 	open() {
-		this.overlay.style.display = 'flex';
-		this.overlay.style.opacity = 1;
-		this.container.style.display = 'flex';
-		this.container.style.opacity = 1;
+
+		this.overlay.classList.add('active')
+
 	},
 
 	close() {
-		this.overlay.style.display = 'none';
-		this.overlay.style.opacity = 0;
-		this.container.style.display = 'none';
-		this.container.style.opacity = 0;
+
+		JournalEntryModal.handleClear();
+		this.overlay.classList.remove('active');
 	},
 
 	async handleSubmit(e) {
@@ -311,32 +314,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 		});
 	}
 
-	const closeBtn = document.getElementById('jem-close')
-	if (closeBtn) {
-		closeBtn.addEventListener('click', () => JournalEntryModal.close());
-	}
-
-	const submitBtn = document.getElementById('jem-submit')
-	if (submitBtn) {
-		submitBtn.addEventListener('click', async () => {
-			try {
-				const result = await JournalEntryModal.handleSubmit();
-				if (result?.ok) {
-					JournalEntryModal.handleClear();
-					alert('Entry submitted successfully.');
-				}
-			} catch (err) {
-				console.error('Submission failed:', err);
-				alert('Failed to submit entry.');
-			}
-		});
-	}
-
-	const clearBtn = document.getElementById('jem-clear')
-	if (clearBtn) {
-		clearBtn.addEventListener('click', () => {
-			JournalEntryModal.handleClear();
-		});
-	}
 	console.log('JEM initialized.')
 });
