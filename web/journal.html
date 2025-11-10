@@ -67,13 +67,16 @@
         <div class="filters-grid">
           <div class="filter-group">
             <label>Search:</label>
-            <input type="text" id="searchEntry" placeholder="Entry #, Description..." onkeyup="applyFilters()">
+            <input type="text" id="searchEntry" placeholder="Entry #, Account Name, Amount, Description..." onkeyup="applyFilters()">
           </div>
           <div class="filter-group">
             <label>Status:</label>
             <select id="filterStatus" onchange="applyFilters()">
               <option value="">All Statuses</option>
               <option value="draft">Draft</option>
+              <option value="pending_approval">Pending Approval</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
               <option value="posted">Posted</option>
             </select>
           </div>
@@ -121,6 +124,9 @@
         <span class="close" onclick="closeJournalModal()">&times;</span>
       </div>
       <div class="modal-body">
+        <!-- Error Messages Container -->
+        <div id="errorContainer"></div>
+        
         <form id="journalEntryForm">
           <input type="hidden" id="entryId">
           
@@ -130,8 +136,8 @@
               <input type="date" id="entryDate" required>
             </div>
             <div class="form-group">
-              <label for="entryReference">Reference #:</label>
-              <input type="text" id="entryReference" placeholder="Invoice #, Check #, etc.">
+              <label for="entryReference">Reference #: <small style="color: var(--gray-400);">(Auto-generated)</small></label>
+              <input type="text" id="entryReference" placeholder="JE-XXXXXX" style="background-color: var(--gray-100); cursor: not-allowed;">
             </div>
           </div>
 
@@ -144,6 +150,14 @@
 
           <div class="form-group">
             <label>Line Items:</label>
+            <!-- Column Headers -->
+            <div class="line-item-headers">
+              <div>Account</div>
+              <div class="header-debit">Debit</div>
+              <div class="header-credit">Credit</div>
+              <div>Description</div>
+              <div></div>
+            </div>
             <div id="lineItemsContainer">
               <!-- Line items will be added here dynamically -->
             </div>
@@ -169,7 +183,28 @@
             </div>
           </div>
 
+          <hr style="margin: 1.5rem 0; border-color: var(--gray-700);">
+
+          <!-- File Attachments Section -->
+          <div class="form-group">
+            <label>Source Documents:</label>
+            <small style="color: var(--gray-400); display: block; margin-bottom: 0.5rem;">
+              Attach supporting documents (PDF, Word, Excel, CSV, JPG, PNG) - Max 10MB per file
+            </small>
+            <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.jpg,.jpeg,.png" 
+                   style="display: none;" onchange="handleFileSelect(event)">
+            <button type="button" onclick="document.getElementById('fileInput').click()" class="btn-secondary" style="margin-bottom: 0.5rem;">
+              📎 Attach Files
+            </button>
+            <div id="attachedFilesList" class="attached-files-list">
+              <!-- Attached files will appear here -->
+            </div>
+          </div>
+
           <div class="modal-footer">
+            <button type="button" onclick="resetJournalEntry()" class="btn-secondary" title="Clear all fields and start over">
+              🔄 Reset
+            </button>
             <button type="button" onclick="closeJournalModal()" class="btn-secondary">Cancel</button>
             <button type="button" id="saveDraftBtn" onclick="saveJournalEntry('draft')" class="btn-secondary">
               💾 Save Draft
@@ -197,6 +232,34 @@
       </div>
       <div class="modal-footer">
         <button onclick="closeViewModal()" class="btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rejection Reason Modal -->
+  <div id="rejectModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Reject Journal Entry</h3>
+        <span class="close" onclick="closeRejectModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="rejectEntryId">
+        <div class="form-group">
+          <label for="rejectionReason">Rejection Reason: *</label>
+          <textarea id="rejectionReason" rows="4" required 
+                    placeholder="Please provide a detailed reason for rejecting this journal entry..." 
+                    style="width: 100%; resize: vertical;"></textarea>
+          <small style="color: var(--gray-400); display: block; margin-top: 0.5rem;">
+            This reason will be visible to the accountant who submitted the entry.
+          </small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeRejectModal()" class="btn-secondary">Cancel</button>
+        <button onclick="rejectEntry()" class="btn-danger">
+          ✗ Reject Entry
+        </button>
       </div>
     </div>
   </div>

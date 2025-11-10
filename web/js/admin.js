@@ -1051,11 +1051,33 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 });
 
+// Format event type for display
+function formatEventType(eventType) {
+  if (!eventType) return 'Unknown Event';
+  
+  const typeMap = {
+    'account_added': 'Account Added',
+    'account_modified': 'Account Modified',
+    'account_activated': 'Account Activated',
+    'account_deactivated': 'Account Deactivated',
+    'journal_entry': 'Journal Entry Created',
+    'journal_entry_approved': 'Journal Entry Approved',
+    'journal_entry_rejected': 'Journal Entry Rejected',
+    'journal_entry_posted': 'Journal Entry Posted',
+    'user_approved': 'User Approved',
+    'user_deleted': 'User Deleted',
+    'user_activated': 'User Activated',
+    'user_deactivated': 'User Deactivated'
+  };
+  
+  return typeMap[eventType] || eventType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
+
 // Load recent activity
 async function loadRecentActivity() {
   try {
     const activityQuery = query(
-      collection(db, "adminActions"),
+      collection(db, "eventLogs"),
       orderBy("timestamp", "desc"),
       limit(10)
     );
@@ -1070,12 +1092,14 @@ async function loadRecentActivity() {
       const activityItem = document.createElement("div");
       activityItem.className = "activity-item";
       
-      const timestamp = activity.timestamp?.toDate().toLocaleString() || 'Unknown time';
+      const timestamp = activity.timestamp?.toDate?.().toLocaleString() || activity.dateTime || 'Just now';
+      const description = activity.description || formatEventType(activity.eventType);
+      const user = activity.username || 'System';
       
       activityItem.innerHTML = `
         <div class="activity-details">
-          <strong>Admin Action:</strong> ${activity.action.replace(/_/g, ' ')}
-          ${activity.details ? `<br>${activity.details}` : ''}
+          <strong>${description}</strong>
+          <br><small>by ${user}</small>
         </div>
         <div class="activity-time">${timestamp}</div>
       `;

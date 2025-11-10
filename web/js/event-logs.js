@@ -144,20 +144,28 @@ function displayEventLogs(logs) {
     return;
   }
 
-  tbody.innerHTML = logs.map(log => `
-    <tr>
-      <td><code>${log.eventId?.substring(0, 8) || 'N/A'}</code></td>
-      <td>${formatTimestamp(log.timestamp)}</td>
-      <td><span class="badge badge-${getEventBadgeClass(log.eventType)}">${formatEventType(log.eventType)}</span></td>
-      <td>${log.accountName || log.details || 'N/A'}</td>
-      <td>${log.username || 'System'}</td>
-      <td>
-        <button onclick="viewEventDetails('${log.id}')" class="btn-action" title="View Details">
-          View Details
-        </button>
-      </td>
-    </tr>
-  `).join('');
+  tbody.innerHTML = logs.map(log => {
+    // For journal entries, show affected account names from afterImage
+    let displayName = log.accountName || log.details || 'N/A';
+    if (log.eventType && log.eventType.includes('journal_entry') && log.afterImage?.affectedAccounts) {
+      displayName = log.afterImage.affectedAccounts;
+    }
+    
+    return `
+      <tr>
+        <td><code>${log.eventId?.substring(0, 8) || 'N/A'}</code></td>
+        <td>${formatTimestamp(log.timestamp)}</td>
+        <td><span class="badge badge-${getEventBadgeClass(log.eventType)}">${formatEventType(log.eventType)}</span></td>
+        <td>${displayName}</td>
+        <td>${log.username || 'System'}</td>
+        <td>
+          <button onclick="viewEventDetails('${log.id}')" class="btn-action" title="View Details">
+            View Details
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
 }
 
 /**
@@ -207,8 +215,8 @@ window.viewEventDetails = function(eventId) {
         <span>${event.username || 'System'} (${event.userId || 'N/A'})</span>
       </div>
       <div class="detail-row">
-        <strong>Account/Record:</strong>
-        <span>${event.accountName || event.details || 'N/A'}</span>
+        <strong>Account Names:</strong>
+        <span>${event.afterImage?.affectedAccounts || event.accountName || event.details || 'N/A'}</span>
       </div>
     </div>
 
@@ -377,9 +385,9 @@ onAuthStateChanged(auth, async (user) => {
         currentDateDiv.textContent = now.toLocaleDateString('en-US', options);
       }
       
-      // Only administrators can view event logs
-      if (userRole !== 'administrator') {
-        alert('Access denied. Only administrators can view event logs.');
+      // Only administrators, managers, and accountants can view event logs
+      if (userRole !== 'administrator' && userRole !== 'manager' && userRole !== 'accountant') {
+        alert('Access denied. Only administrators, managers, and accountants can view event logs.');
         window.location.href = 'admin.html';
         return;
       }

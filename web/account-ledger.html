@@ -67,6 +67,30 @@
         </div>
       </div>
 
+      <!-- Filter and Search Section -->
+      <div class="filter-section" id="ledgerFilterSection" style="display: none; margin-bottom: var(--space-4);">
+        <h3 style="margin-bottom: var(--space-3); color: var(--gray-300);">Filter & Search Transactions</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-4);">
+          <div class="filter-group">
+            <label for="filterFromDate">From Date:</label>
+            <input type="date" id="filterFromDate" class="filter-input" onchange="applyLedgerFilters()">
+          </div>
+          <div class="filter-group">
+            <label for="filterToDate">To Date:</label>
+            <input type="date" id="filterToDate" class="filter-input" onchange="applyLedgerFilters()">
+          </div>
+          <div class="filter-group">
+            <label for="searchLedger">Search (Description/Amount):</label>
+            <input type="text" id="searchLedger" class="filter-input" placeholder="Search description or amount..." oninput="applyLedgerFilters()">
+          </div>
+          <div class="filter-group" style="display: flex; align-items: flex-end;">
+            <button onclick="clearLedgerFilters()" class="btn-secondary" style="width: 100%;" title="Clear all filters">
+              Clear Filters
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Account Information Card -->
       <div class="account-info-card">
         <div id="accountDetails">

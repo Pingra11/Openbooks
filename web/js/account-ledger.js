@@ -14,6 +14,8 @@ import { setChip } from "./ui.js";
 let currentUser = null;
 let accountId = null;
 let allAccounts = [];
+let allTransactions = []; // Store all transactions for filtering
+let currentAccountName = ''; // Store current account name for search
 
 /**
  * Format currency
@@ -70,6 +72,8 @@ window.changeAccount = function() {
   if (selectedId) {
     accountId = selectedId;
     loadAccountDetails();
+    // Show filter section when account is selected
+    document.getElementById('ledgerFilterSection').style.display = 'block';
   } else {
     // Reset display
     document.getElementById('accountTitle').textContent = 'Account Ledger';
@@ -80,6 +84,8 @@ window.changeAccount = function() {
     `;
     const tbody = document.querySelector('#ledgerTable tbody');
     tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No account selected</td></tr>';
+    // Hide filter section when no account selected
+    document.getElementById('ledgerFilterSection').style.display = 'none';
   }
 }
 
@@ -98,7 +104,11 @@ async function loadAccountDetails() {
       return;
     }
     
+    // Show filter section when account is loaded
+    document.getElementById('ledgerFilterSection').style.display = 'block';
+    
     const account = accountDoc.data();
+    currentAccountName = account.accountName; // Store for search
     
     // Update page title
     document.getElementById('accountTitle').textContent = `${account.accountName} Ledger`;
@@ -171,9 +181,9 @@ async function loadLedgerTransactions() {
     
     const transactionsSnapshot = await getDocs(transactionsQuery);
     
-    const tbody = document.querySelector('#ledgerTable tbody');
-    
     if (transactionsSnapshot.empty) {
+      allTransactions = [];
+      const tbody = document.querySelector('#ledgerTable tbody');
       tbody.innerHTML = `
         <tr>
           <td colspan="6" style="text-align: center; padding: 2rem;">
@@ -187,31 +197,14 @@ async function loadLedgerTransactions() {
       return;
     }
     
-    let runningBalance = 0;
-    const transactions = [];
-    
+    // Store all transactions
+    allTransactions = [];
     transactionsSnapshot.forEach(doc => {
-      transactions.push({ id: doc.id, ...doc.data() });
+      allTransactions.push({ id: doc.id, ...doc.data() });
     });
     
-    tbody.innerHTML = transactions.map(txn => {
-      runningBalance = txn.balance || 0;
-      
-      const date = txn.date.toDate ? txn.date.toDate().toLocaleDateString() : '-';
-      const debit = txn.debit > 0 ? formatCurrency(txn.debit) : '-';
-      const credit = txn.credit > 0 ? formatCurrency(txn.credit) : '-';
-      
-      return `
-        <tr>
-          <td>${date}</td>
-          <td>${txn.description || '-'}</td>
-          <td>${txn.journalEntryId ? 'JE-' + txn.journalEntryId.substring(0, 6) : '-'}</td>
-          <td>${debit}</td>
-          <td>${credit}</td>
-          <td><strong>${formatCurrency(runningBalance)}</strong></td>
-        </tr>
-      `;
-    }).join('');
+    // Render with no filters initially
+    renderLedgerTransactions(allTransactions);
     
   } catch (error) {
     console.error('Error loading transactions:', error);
@@ -225,6 +218,130 @@ async function loadLedgerTransactions() {
     `;
   }
 }
+
+/**
+ * Render ledger transactions to table
+ */
+function renderLedgerTransactions(transactions) {
+  const tbody = document.querySelector('#ledgerTable tbody');
+  
+  if (transactions.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align: center; padding: 2rem;">
+          <p style="color: var(--gray-400);">No transactions match the current filters</p>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+  
+  let runningBalance = 0;
+  
+  tbody.innerHTML = transactions.map(txn => {
+    runningBalance = txn.balance || 0;
+    
+    const date = txn.date.toDate ? txn.date.toDate().toLocaleDateString() : '-';
+    const debit = txn.debit > 0 ? formatCurrency(txn.debit) : '-';
+    const credit = txn.credit > 0 ? formatCurrency(txn.credit) : '-';
+    
+    // Make PR clickable if there's a journal entry ID - use the reference number
+    const prCell = txn.journalEntryId 
+      ? `<a href="journal.html?viewEntry=${txn.journalEntryId}" class="pr-link" title="View Journal Entry">${txn.postReference || 'JE-' + txn.journalEntryId.substring(0, 6)}</a>`
+      : '-';
+    
+    return `
+      <tr>
+        <td>${date}</td>
+        <td>${txn.description || '-'}</td>
+        <td>${prCell}</td>
+        <td>${debit}</td>
+        <td>${credit}</td>
+        <td><strong>${formatCurrency(runningBalance)}</strong></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+/**
+ * Apply filters and search to ledger transactions
+ */
+window.applyLedgerFilters = function() {
+  const fromDateStr = document.getElementById('filterFromDate').value;
+  const toDateStr = document.getElementById('filterToDate').value;
+  const searchTerm = document.getElementById('searchLedger').value.toLowerCase().trim();
+  
+  let filteredTransactions = [...allTransactions];
+  
+  // Filter by from date
+  if (fromDateStr) {
+    const fromDate = new Date(fromDateStr);
+    fromDate.setHours(0, 0, 0, 0);
+    filteredTransactions = filteredTransactions.filter(txn => {
+      const txnDate = txn.date.toDate ? txn.date.toDate() : new Date(txn.date);
+      txnDate.setHours(0, 0, 0, 0);
+      return txnDate >= fromDate;
+    });
+  }
+  
+  // Filter by to date
+  if (toDateStr) {
+    const toDate = new Date(toDateStr);
+    toDate.setHours(23, 59, 59, 999);
+    filteredTransactions = filteredTransactions.filter(txn => {
+      const txnDate = txn.date.toDate ? txn.date.toDate() : new Date(txn.date);
+      return txnDate <= toDate;
+    });
+  }
+  
+  // Search by account name, description, or amount
+  if (searchTerm) {
+    filteredTransactions = filteredTransactions.filter(txn => {
+      // Search in account name
+      const accountNameMatch = currentAccountName.toLowerCase().includes(searchTerm);
+      
+      // Search in description
+      const description = (txn.description || '').toLowerCase();
+      const descriptionMatch = description.includes(searchTerm);
+      
+      // Normalize and search in amounts (strip $, commas, and parse to number)
+      const normalizeAmount = (val) => {
+        if (!val || val <= 0) return '';
+        return val.toString().replace(/[^0-9.]/g, ''); // Keep only digits and decimal
+      };
+      
+      const debitNormalized = normalizeAmount(txn.debit);
+      const creditNormalized = normalizeAmount(txn.credit);
+      const balanceNormalized = normalizeAmount(Math.abs(txn.balance || 0));
+      
+      // Also check formatted strings for exact matches (e.g., "$1,000.00")
+      const debitStr = txn.debit > 0 ? formatCurrency(txn.debit).toLowerCase() : '';
+      const creditStr = txn.credit > 0 ? formatCurrency(txn.credit).toLowerCase() : '';
+      const balanceStr = formatCurrency(txn.balance || 0).toLowerCase();
+      
+      const amountMatch = debitNormalized.includes(searchTerm) ||
+                         creditNormalized.includes(searchTerm) ||
+                         balanceNormalized.includes(searchTerm) ||
+                         debitStr.includes(searchTerm) ||
+                         creditStr.includes(searchTerm) ||
+                         balanceStr.includes(searchTerm);
+      
+      return accountNameMatch || descriptionMatch || amountMatch;
+    });
+  }
+  
+  renderLedgerTransactions(filteredTransactions);
+};
+
+/**
+ * Clear all ledger filters
+ */
+window.clearLedgerFilters = function() {
+  document.getElementById('filterFromDate').value = '';
+  document.getElementById('filterToDate').value = '';
+  document.getElementById('searchLedger').value = '';
+  renderLedgerTransactions(allTransactions);
+};
 
 // Get account ID from URL (optional)
 const urlParams = new URLSearchParams(window.location.search);

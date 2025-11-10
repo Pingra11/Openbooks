@@ -483,13 +483,35 @@ window.changePage = function(direction) {
   displayUsers();
 };
 
+// Format event type for display
+function formatEventType(eventType) {
+  if (!eventType) return 'Unknown Event';
+  
+  const typeMap = {
+    'account_added': 'Account Added',
+    'account_modified': 'Account Modified',
+    'account_activated': 'Account Activated',
+    'account_deactivated': 'Account Deactivated',
+    'journal_entry': 'Journal Entry Created',
+    'journal_entry_approved': 'Journal Entry Approved',
+    'journal_entry_rejected': 'Journal Entry Rejected',
+    'journal_entry_posted': 'Journal Entry Posted',
+    'user_approved': 'User Approved',
+    'user_deleted': 'User Deleted',
+    'user_activated': 'User Activated',
+    'user_deactivated': 'User Deactivated'
+  };
+  
+  return typeMap[eventType] || eventType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
+
 // Load recent activity
 async function loadRecentActivity() {
   try {
     const activityList = document.getElementById("recentActivity");
     if (!activityList) return;
     
-    const logsQuery = query(collection(db, "adminActions"), orderBy("timestamp", "desc"), limit(10));
+    const logsQuery = query(collection(db, "eventLogs"), orderBy("timestamp", "desc"), limit(10));
     const logsSnap = await getDocs(logsQuery);
     
     if (logsSnap.empty) {
@@ -500,8 +522,17 @@ async function loadRecentActivity() {
     let html = "";
     logsSnap.forEach(doc => {
       const activity = doc.data();
-      const timestamp = activity.timestamp?.toDate().toLocaleString() || "Unknown";
-      html += `<div class="activity-item">${activity.details || activity.action} - ${timestamp}</div>`;
+      const timestamp = activity.timestamp?.toDate?.().toLocaleString() || activity.dateTime || 'Just now';
+      const description = activity.description || formatEventType(activity.eventType);
+      const user = activity.username || 'System';
+      
+      html += `<div class="activity-item">
+        <div class="activity-details">
+          <strong>${description}</strong>
+          <br><small>by ${user}</small>
+        </div>
+        <div class="activity-time">${timestamp}</div>
+      </div>`;
     });
     
     activityList.innerHTML = html;

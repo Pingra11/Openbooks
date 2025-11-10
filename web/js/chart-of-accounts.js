@@ -210,10 +210,12 @@ function displayAccounts(accounts) {
         <button onclick="viewAccountDetails('${account.id}')" class="btn-action" title="View Details">
           View
         </button>
-        ${userRole === 'administrator' ? `
+        ${(userRole === 'administrator' || userRole === 'manager' || userRole === 'accountant') ? `
           <button onclick="viewAccountEventLogs('${account.accountName}')" class="btn-action" title="View Event Logs for this Account">
             View Logs
           </button>
+        ` : ''}
+        ${userRole === 'administrator' ? `
           <button onclick="editAccount('${account.id}')" class="btn-action" title="Edit Account">
             Edit
           </button>
@@ -790,8 +792,8 @@ onAuthStateChanged(auth, async (user) => {
  * Show send email modal and load recipients
  */
 window.showSendEmailModal = async function() {
-  if (userRole !== 'administrator') {
-    alert('Only administrators can send emails');
+  if (userRole !== 'administrator' && userRole !== 'manager' && userRole !== 'accountant') {
+    alert('Only administrators, managers, and accountants can send emails');
     return;
   }
   
@@ -827,9 +829,24 @@ async function loadEmailRecipients() {
   try {
     recipientsList.innerHTML = '<div class="loading-message">Loading users...</div>';
     
-    // Query Firestore for manager and accountant users (active and not suspended)
+    // Determine which users to load based on current user's role
+    let roleFilter;
+    if (userRole === 'administrator') {
+      // Admins can email managers and accountants
+      roleFilter = ['manager', 'accountant'];
+    } else if (userRole === 'manager') {
+      // Managers can email administrators and other managers
+      roleFilter = ['administrator', 'manager'];
+    } else if (userRole === 'accountant') {
+      // Accountants can email administrators and managers
+      roleFilter = ['administrator', 'manager'];
+    } else {
+      roleFilter = [];
+    }
+    
+    // Query Firestore for appropriate users (active and not suspended)
     const usersRef = collection(db, 'users');
-    const q = query(usersRef, where('role', 'in', ['manager', 'accountant']), where('active', '==', true));
+    const q = query(usersRef, where('role', 'in', roleFilter), where('active', '==', true));
     const snapshot = await getDocs(q);
     
     console.log(`Found ${snapshot.size} manager/accountant users in Firestore`);
@@ -851,11 +868,11 @@ async function loadEmailRecipients() {
       return;
     }
     
-    // Sort users: Managers first, then Accountants
+    // Sort users: Administrators first, then Managers, then Accountants
     activeUsers.sort((a, b) => {
-      // Manager (1) comes before Accountant (2)
-      const roleOrder = { 'manager': 1, 'accountant': 2 };
-      const roleComparison = (roleOrder[a.role] || 3) - (roleOrder[b.role] || 3);
+      // Administrator (1) comes before Manager (2) comes before Accountant (3)
+      const roleOrder = { 'administrator': 1, 'manager': 2, 'accountant': 3 };
+      const roleComparison = (roleOrder[a.role] || 4) - (roleOrder[b.role] || 4);
       
       if (roleComparison !== 0) return roleComparison;
       
@@ -954,8 +971,8 @@ window.filterEmailRecipients = function() {
 window.handleSendEmail = async function(event) {
   event.preventDefault();
   
-  if (userRole !== 'administrator') {
-    alert('Only administrators can send emails');
+  if (userRole !== 'administrator' && userRole !== 'manager' && userRole !== 'accountant') {
+    alert('Only administrators, managers, and accountants can send emails');
     return;
   }
   
