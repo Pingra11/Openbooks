@@ -18,7 +18,7 @@ OpenBooks is a comprehensive web-based accounting and user management platform. 
 | **Approval Workflow** | Accountants submit → Managers approve/reject → Post to ledger; email notifications sent |
 | **Account Ledgers** | Real-time transaction tracking with running balances; clickable post references |
 | **Financial Reports** | Trial Balance, Balance Sheet, Income Statement, Retained Earnings |
-| **Export Options** | PDF, CSV, Email (Replit Mail), and Print with custom CSS |
+| **Export Options** | PDF, CSV, Email, and Print with custom CSS |
 | **Event Logging** | Full audit trail with before/after snapshots for every change |
 | **Password Recovery** | Security questions-based account recovery flow |
 | **Dashboard** | Financial health ratios, important messages section, role-based navigation |
@@ -35,7 +35,6 @@ OpenBooks is a comprehensive web-based accounting and user management platform. 
 | **Admin SDK** | Firebase Admin SDK (Python) |
 | **Frontend** | Vanilla JavaScript (ES6 modules), HTML5, CSS3 |
 | **PDF Export** | jsPDF + jsPDF-AutoTable (CDN) |
-| **Email** | Replit Mail API |
 | **File Storage** | Base64-encoded in Firestore (max 2 MB per file) |
 
 ---
