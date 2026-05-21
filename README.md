@@ -8,6 +8,14 @@ OpenBooks is a comprehensive web-based accounting and user management platform. 
 
 ---
 
+## Preview Images
+
+<img width="1920" height="1080" alt="HomePage" src="https://github.com/user-attachments/assets/f01e3c3d-8084-4301-b4e9-10ba4a3afa10" />
+<img width="1920" height="1080" alt="Console" src="https://github.com/user-attachments/assets/a7b72f83-1fe5-49fb-9240-5a8c936ee134" />
+<img width="1920" height="1080" alt="COA" src="https://github.com/user-attachments/assets/f86a859b-1e83-4e7e-aa24-2f3749979aea" />
+
+---
+
 ## Features
 
 | Feature | Description |
