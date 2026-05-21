@@ -1,9 +1,5 @@
 # OpenBooks — Accounting & User Management System
 
-[![Run on Replit](https://replit.com/badge/github)](https://replit.com/new/github/YOUR_USERNAME/YOUR_REPO_NAME)
-
-> **To use the Open in Replit button:** Replace `YOUR_USERNAME/YOUR_REPO_NAME` in the badge URL above with your actual GitHub username and repository name after pushing this project.
-
 ---
 
 ## Overview
